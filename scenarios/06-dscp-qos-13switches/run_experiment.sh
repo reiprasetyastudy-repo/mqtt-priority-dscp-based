@@ -47,34 +47,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-# Step 1: Start Ryu Controller
-echo "[1/2] Starting Ryu Controller..."
-source "$RYU_ENV/bin/activate"
-
-"$RYU_ENV/bin/python3.9" -u "$RYU_ENV/bin/ryu-manager" \
-    "$SCENARIO_DIR/controller_dscp.py" \
-    ryu.app.ofctl_rest \
-    > "$PROJECT_ROOT/logs/ryu.log" 2>&1 &
-
-RYU_PID=$!
-echo "  ✓ Controller started (PID: $RYU_PID)"
-
-# Wait for controller to initialize
-sleep 3
-
-# Check if controller is still running
-if ! ps -p $RYU_PID > /dev/null; then
-    echo "[ERROR] Controller failed to start!"
-    echo "Check: $PROJECT_ROOT/logs/ryu.log"
-    exit 1
-fi
-
-# Step 2: Run Topology
-echo ""
-echo "[2/2] Starting Network Topology..."
-echo ""
-
-# Create timestamped results directory
+# Create timestamped results directory FIRST
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 RUN_RESULTS_DIR="$PROJECT_ROOT/results/06-dscp-qos-13switches/run_$TIMESTAMP"
 mkdir -p "$RUN_RESULTS_DIR/logs"
@@ -82,8 +55,33 @@ mkdir -p "$RUN_RESULTS_DIR/logs"
 echo "Results will be saved to: $RUN_RESULTS_DIR"
 echo ""
 
-# Save controller log to results folder
-cp "$PROJECT_ROOT/logs/ryu.log" "$RUN_RESULTS_DIR/logs/ryu_controller.log" 2>/dev/null || true
+# Step 1: Start Ryu Controller
+echo "[1/2] Starting Ryu Controller..."
+source "$RYU_ENV/bin/activate"
+
+"$RYU_ENV/bin/python3.9" -u "$RYU_ENV/bin/ryu-manager" \
+    "$SCENARIO_DIR/controller_dscp.py" \
+    ryu.app.ofctl_rest \
+    > "$RUN_RESULTS_DIR/logs/ryu_controller.log" 2>&1 &
+
+RYU_PID=$!
+echo "  ✓ Controller started (PID: $RYU_PID)"
+echo "  ✓ Controller log: $RUN_RESULTS_DIR/logs/ryu_controller.log"
+
+# Wait for controller to initialize
+sleep 3
+
+# Check if controller is still running
+if ! ps -p $RYU_PID > /dev/null; then
+    echo "[ERROR] Controller failed to start!"
+    echo "Check: $RUN_RESULTS_DIR/logs/ryu_controller.log"
+    exit 1
+fi
+
+# Step 2: Run Topology
+echo ""
+echo "[2/2] Starting Network Topology..."
+echo ""
 
 cd "$RUN_RESULTS_DIR"
 
