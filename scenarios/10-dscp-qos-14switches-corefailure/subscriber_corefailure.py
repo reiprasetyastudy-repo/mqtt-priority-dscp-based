@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Enhanced Subscriber with Phase Tracking for Link Failure Test (Scenario 10)
+Enhanced Subscriber with Phase Tracking for Core Failure Test (Scenario 10)
 
 Tracks metrics separately for:
-- Phase 1: Normal operation (before link failure)
-- Phase 2: Link down (after link failure)
+- Phase 1: Normal operation (both cores active)
+- Phase 2: Core 2 down (traffic via Core 1 only)
 
-This allows comparison of QoS performance before/after link failure.
+This allows comparison of QoS performance before/after core failure.
 """
 
 import paho.mqtt.client as mqtt
@@ -26,9 +26,9 @@ CONFIG = {
     'bandwidth_limit_enabled': os.environ.get('ENABLE_BANDWIDTH_LIMIT', 'Unknown'),
     'bandwidth_mbps': os.environ.get('LINK_BANDWIDTH_MBPS', 'Unknown'),
     'qos_queues_enabled': os.environ.get('ENABLE_QOS_QUEUES', 'Unknown'),
-    'scenario': os.environ.get('SCENARIO_NAME', '10-dscp-qos-13switches-linkfailure'),
-    'topology': os.environ.get('TOPOLOGY_TYPE', 'DSCP Ring with Link Failure'),
-    'num_switches': os.environ.get('NUM_SWITCHES', '13'),
+    'scenario': os.environ.get('SCENARIO_NAME', '10-dscp-qos-14switches-corefailure'),
+    'topology': os.environ.get('TOPOLOGY_TYPE', 'DSCP Dual Core + Core Failure'),
+    'num_switches': os.environ.get('NUM_SWITCHES', '14'),
     'num_publishers': os.environ.get('NUM_PUBLISHERS', '18'),
     'phase1_duration': int(os.environ.get('PHASE1_DURATION', '30')),
 }
@@ -82,8 +82,8 @@ class PhaseMetricsCollector:
             if self.link_failure_time is None:
                 self.link_failure_time = time.time()
                 print(f"\n{'='*70}")
-                print(f"  PHASE TRANSITION: Link Failure Occurred!")
-                print(f"  Time: {elapsed:.1f}s - Switching to Phase 2 (Link Down)")
+                print(f"  PHASE TRANSITION: Core Failure Occurred!")
+                print(f"  Time: {elapsed:.1f}s - Switching to Phase 2 (Core Down)")
                 print(f"{'='*70}\n")
             return 'phase2'
     
@@ -238,7 +238,7 @@ def on_message(client, userdata, msg):
                 phase
             ])
         
-        phase_label = "NORMAL" if phase == "phase1" else "LINK_DOWN"
+        phase_label = "NORMAL" if phase == "phase1" else "CORE_DOWN"
         print(f"[{phase_label:9s}] [{data['type']:7s}] seq={data['seq']:4d} delay={delay:5.2f}ms")
     
     except Exception as e:
@@ -294,7 +294,7 @@ def cleanup(signal_num=None, frame=None):
         header = f"""
 {'='*70}
   LINK FAILURE TEST - SIMULATION SUMMARY
-  Scenario 10: DSCP QoS with Ring Topology + Link Failure
+  Scenario 10: DSCP QoS with Ring Topology + Core Failure
 {'='*70}
 
 CONFIGURATION:
@@ -309,7 +309,7 @@ CONFIGURATION:
 
 TEST PHASES:
   Phase 1 (0-{CONFIG['phase1_duration']}s)  : Normal operation - all links active
-  Phase 2 ({CONFIG['phase1_duration']}s+)   : Link s2↔s1 DOWN - traffic via ring
+  Phase 2 ({CONFIG['phase1_duration']}s+)   : Link Core 2 (s2) DOWN - traffic via ring
 """
         print(header)
         f.write(header)
@@ -327,7 +327,7 @@ TEST PHASES:
         # Comparison
         comparison = f"""
 {'='*70}
-  PHASE COMPARISON (Impact of Link Failure)
+  PHASE COMPARISON (Impact of Core Failure)
 {'='*70}
 """
         print(comparison)
@@ -371,7 +371,7 @@ TEST PHASES:
                 verdict += "  ✓ REDUNDANCY WORKS! Traffic successfully rerouted via ring.\n"
                 verdict += "    Link failure did NOT cause complete network outage.\n"
             else:
-                verdict += "  ✗ REDUNDANCY FAILED! No messages received after link failure.\n"
+                verdict += "  ✗ REDUNDANCY FAILED! No messages received after core failure.\n"
             
             print(verdict)
             f.write(verdict)
@@ -403,7 +403,7 @@ print("=" * 70)
 print(" " * 10 + "LINK FAILURE TEST SUBSCRIBER STARTED")
 print("=" * 70)
 print(f"\nPhase 1 Duration: {CONFIG['phase1_duration']} seconds (Normal Operation)")
-print(f"Phase 2 Start   : After {CONFIG['phase1_duration']}s (Link Down)")
+print(f"Phase 2 Start   : After {CONFIG['phase1_duration']}s (Core Down)")
 print("\nCollecting metrics per phase:")
 print("  - End-to-End Delay")
 print("  - Jitter")
