@@ -70,25 +70,59 @@ ryu-manager --version
 
 ## Quick Start
 
-### Menjalankan Skenario 09 (Ring Topology)
+### Skenario 06: High Congestion (Recommended untuk Thesis)
+
 ```bash
-cd scenarios/09-dscp-qos-13switches-ring
-sudo ./run_experiment.sh 60  # 60 detik kirim + 60 detik drain = 2 menit total
+# 1. Masuk ke folder skenario
+cd /home/mqtt-sdn/scenarios/06-dscp-qos-13switches
+
+# 2. Jalankan eksperimen (60 detik = 2 menit total dengan drain time)
+sudo ./run_experiment.sh 60
+
+# 3. Lihat hasil
+cat /home/mqtt-sdn/results/06-dscp-qos-13switches/run_*/metrics_summary.txt
+
+# 4. Generate summary detail dengan per-sensor metrics
+cd /home/mqtt-sdn
+python3 generate_summary_manual_v2.py results/06-dscp-qos-13switches/run_*/mqtt_metrics_log.csv
 ```
 
-### Menjalankan Skenario 10 (Link Failure Test)
+**Konfigurasi Skenario 06:**
+- Bandwidth: 0.5 Mbps (high congestion)
+- 18 publishers (9 anomaly DSCP 46 + 9 normal DSCP 0)
+- 13 switches (1 core + 3 aggregation + 9 edge)
+- Message rate: 50 msg/s per publisher
+
+### Skenario Lainnya
+
 ```bash
-cd scenarios/10-dscp-qos-13switches-linkfailure
-sudo ./run_experiment.sh 60  # Phase 1: 30s, Phase 2: 30s, Drain: 60s
+# Skenario 07: Core Bottleneck
+cd /home/mqtt-sdn/scenarios/07-dscp-qos-13switches-core-bottleneck
+sudo ./run_experiment.sh 60
+
+# Skenario 08: Lossy Network (5% packet loss)
+cd /home/mqtt-sdn/scenarios/08-dscp-qos-13switches-lossy
+sudo ./run_experiment.sh 60
+
+# Skenario 09: Ring Topology (redundansi)
+cd /home/mqtt-sdn/scenarios/09-dscp-qos-13switches-ring
+sudo ./run_experiment.sh 60
+
+# Skenario 10: Link Failure Test
+cd /home/mqtt-sdn/scenarios/10-dscp-qos-13switches-linkfailure
+sudo ./run_experiment.sh 60
 ```
 
 ### Lihat Hasil
 ```bash
-# Summary otomatis
-cat results/09-dscp-qos-13switches-ring/run_*/metrics_summary.txt
+# Summary otomatis (ganti XX dengan nomor skenario)
+cat /home/mqtt-sdn/results/XX-*/run_*/metrics_summary.txt
 
-# Generate summary detail
-python3 generate_summary_manual_v2.py results/09-*/run_*/mqtt_metrics_log.csv
+# Generate summary detail per-sensor
+python3 generate_summary_manual_v2.py results/XX-*/run_*/mqtt_metrics_log.csv
+
+# Untuk skenario 10 (link failure), gunakan script khusus:
+python3 generate_summary_linkfailure.py results/10-*/run_*/mqtt_metrics_log.csv
 ```
 
 ## Skenario yang Tersedia
