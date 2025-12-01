@@ -353,6 +353,87 @@ TEST PHASES:
                 print(comp_output)
                 f.write(comp_output)
         
+        # Combined Total (Phase 1 + Phase 2)
+        combined_header = f"""
+{'='*70}
+  COMBINED TOTAL (Phase 1 + Phase 2)
+{'='*70}
+"""
+        print(combined_header)
+        f.write(combined_header)
+        
+        for msg_type in ['anomaly', 'normal']:
+            p1 = full_summary['phase1'].get(msg_type)
+            p2 = full_summary['phase2'].get(msg_type)
+            
+            if p1 and p2:
+                # Combine metrics
+                total_count = p1['count'] + p2['count']
+                # Weighted average delay
+                combined_avg_delay = (p1['avg_delay'] * p1['count'] + p2['avg_delay'] * p2['count']) / total_count if total_count > 0 else 0
+                combined_min_delay = min(p1['min_delay'], p2['min_delay'])
+                combined_max_delay = max(p1['max_delay'], p2['max_delay'])
+                # Weighted average jitter
+                combined_avg_jitter = (p1['avg_jitter'] * p1['count'] + p2['avg_jitter'] * p2['count']) / total_count if total_count > 0 else 0
+                # Combined packet loss
+                total_expected = p1['loss_info']['expected'] + p2['loss_info']['expected']
+                total_received = p1['loss_info']['received'] + p2['loss_info']['received']
+                total_lost = p1['loss_info']['lost'] + p2['loss_info']['lost']
+                combined_loss_rate = (total_lost / total_expected * 100) if total_expected > 0 else 0
+                
+                combined_output = f"""
+{msg_type.upper()}:
+  Total Messages    : {total_count}
+  Avg Delay         : {combined_avg_delay:.2f} ms
+  Min Delay         : {combined_min_delay:.2f} ms
+  Max Delay         : {combined_max_delay:.2f} ms
+  Avg Jitter        : {combined_avg_jitter:.2f} ms
+  
+  PACKET LOSS:
+    Expected        : {total_expected} messages
+    Received        : {total_received} messages
+    Lost            : {total_lost} messages
+    Loss Rate       : {combined_loss_rate:.2f}%
+"""
+                print(combined_output)
+                f.write(combined_output)
+        
+        # Overall totals
+        p1_total = full_summary['phase1']['total']
+        p2_total = full_summary['phase2']['total']
+        overall_messages = p1_total['total_messages'] + p2_total['total_messages']
+        overall_duration = p1_total['duration'] + p2_total['duration']
+        overall_throughput = overall_messages / overall_duration if overall_duration > 0 else 0
+        
+        overall_output = f"""
+OVERALL TOTAL:
+  Duration          : {overall_duration:.2f} s
+  Total Messages    : {overall_messages}
+  Throughput        : {overall_throughput:.2f} msg/s
+"""
+        print(overall_output)
+        f.write(overall_output)
+        
+        # QoS Improvement (combined)
+        p1_anom = full_summary['phase1'].get('anomaly')
+        p1_norm = full_summary['phase1'].get('normal')
+        p2_anom = full_summary['phase2'].get('anomaly')
+        p2_norm = full_summary['phase2'].get('normal')
+        
+        if p1_anom and p1_norm and p2_anom and p2_norm:
+            total_anom_count = p1_anom['count'] + p2_anom['count']
+            total_norm_count = p1_norm['count'] + p2_norm['count']
+            combined_anom_delay = (p1_anom['avg_delay'] * p1_anom['count'] + p2_anom['avg_delay'] * p2_anom['count']) / total_anom_count
+            combined_norm_delay = (p1_norm['avg_delay'] * p1_norm['count'] + p2_norm['avg_delay'] * p2_norm['count']) / total_norm_count
+            
+            if combined_norm_delay > 0:
+                qos_improvement = (combined_norm_delay - combined_anom_delay) / combined_norm_delay * 100
+                qos_output = f"""
+  QoS IMPROVEMENT (Combined): {qos_improvement:.1f}% lower delay for anomaly traffic
+"""
+                print(qos_output)
+                f.write(qos_output)
+        
         # Redundancy verdict
         p2_anomaly = full_summary['phase2'].get('anomaly')
         p2_normal = full_summary['phase2'].get('normal')
@@ -368,8 +449,8 @@ TEST PHASES:
   
 """
             if total_p2_messages > 0:
-                verdict += "  ✓ REDUNDANCY WORKS! Traffic successfully rerouted via ring.\n"
-                verdict += "    Link failure did NOT cause complete network outage.\n"
+                verdict += "  ✓ REDUNDANCY WORKS! Traffic successfully rerouted.\n"
+                verdict += "    Core failure did NOT cause complete network outage.\n"
             else:
                 verdict += "  ✗ REDUNDANCY FAILED! No messages received after core failure.\n"
             
