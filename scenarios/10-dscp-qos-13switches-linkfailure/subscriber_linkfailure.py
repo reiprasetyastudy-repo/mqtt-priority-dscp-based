@@ -48,10 +48,10 @@ class PhaseMetricsCollector:
             'phase2': {'anomaly': [], 'normal': []}
         }
         
-        # Per-device tracking per phase
+        # Per-device tracking per phase (with min_seq for correct packet loss calc)
         self.device_data = {
-            'phase1': defaultdict(lambda: {'type': None, 'received_seq': set(), 'max_seq': -1}),
-            'phase2': defaultdict(lambda: {'type': None, 'received_seq': set(), 'max_seq': -1})
+            'phase1': defaultdict(lambda: {'type': None, 'received_seq': set(), 'min_seq': float('inf'), 'max_seq': -1}),
+            'phase2': defaultdict(lambda: {'type': None, 'received_seq': set(), 'min_seq': float('inf'), 'max_seq': -1})
         }
         
         # Timestamps
@@ -96,6 +96,8 @@ class PhaseMetricsCollector:
         # Per-device sequence tracking
         self.device_data[phase][device]['type'] = msg_type
         self.device_data[phase][device]['received_seq'].add(seq)
+        if seq < self.device_data[phase][device]['min_seq']:
+            self.device_data[phase][device]['min_seq'] = seq
         if seq > self.device_data[phase][device]['max_seq']:
             self.device_data[phase][device]['max_seq'] = seq
         
@@ -118,7 +120,12 @@ class PhaseMetricsCollector:
         return sum(self.jitter_values[phase][msg_type]) / len(self.jitter_values[phase][msg_type])
     
     def calculate_loss_rate(self, phase, msg_type):
-        """Calculate packet loss per-device for a specific phase"""
+        """Calculate packet loss per-device for a specific phase
+        
+        Uses range-based calculation: expected = max_seq - min_seq + 1
+        This correctly handles per-phase packet loss without counting
+        sequences from other phases.
+        """
         total_expected = 0
         total_received = 0
         total_lost = 0
@@ -128,11 +135,14 @@ class PhaseMetricsCollector:
         for device, data in self.device_data[phase].items():
             if data['type'] == msg_type:
                 num_devices += 1
+                min_seq = data['min_seq']
                 max_seq = data['max_seq']
-                if max_seq < 0:
+                
+                if max_seq < 0 or min_seq == float('inf'):
                     continue
                 
-                expected = max_seq + 1
+                # Correct formula: only count the range within this phase
+                expected = max_seq - min_seq + 1
                 received = len(data['received_seq'])
                 lost = expected - received
                 loss_rate = (lost / expected * 100) if expected > 0 else 0

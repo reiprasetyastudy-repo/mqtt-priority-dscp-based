@@ -36,6 +36,7 @@ def calculate_summary(csv_file):
     device_data = defaultdict(lambda: {
         'type': None,
         'received_seq': set(),
+        'min_seq': float('inf'),  # Track min for correct packet loss calc
         'max_seq': -1,
         'delays': []
     })
@@ -70,6 +71,8 @@ def calculate_summary(csv_file):
             device_data[device]['type'] = msg_type
             device_data[device]['received_seq'].add(seq)
             device_data[device]['delays'].append(delay)
+            if seq < device_data[device]['min_seq']:
+                device_data[device]['min_seq'] = seq
             if seq > device_data[device]['max_seq']:
                 device_data[device]['max_seq'] = seq
 
@@ -92,8 +95,15 @@ def calculate_summary(csv_file):
     print("\nPer-device packet loss:")
     for device, data in sorted(device_data.items()):
         msg_type = data['type']
+        min_seq = data['min_seq']
         max_seq = data['max_seq']
-        expected = max_seq + 1  # seq starts from 0
+        
+        # Skip if no valid sequences
+        if max_seq < 0 or min_seq == float('inf'):
+            continue
+            
+        # Correct formula: only count the range we actually saw
+        expected = max_seq - min_seq + 1
         received = len(data['received_seq'])
         lost = expected - received
         loss_rate = (lost / expected * 100) if expected > 0 else 0

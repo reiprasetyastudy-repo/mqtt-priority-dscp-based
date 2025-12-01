@@ -28,6 +28,7 @@ class MetricsCollector:
         self.device_data = defaultdict(lambda: {
             'type': None,
             'received_seq': set(),
+            'min_seq': float('inf'),  # Track min sequence
             'max_seq': -1
         })
         self.first_timestamp = None
@@ -43,6 +44,8 @@ class MetricsCollector:
         # Per-device sequence tracking
         self.device_data[device]['type'] = msg_type
         self.device_data[device]['received_seq'].add(seq)
+        if seq < self.device_data[device]['min_seq']:
+            self.device_data[device]['min_seq'] = seq
         if seq > self.device_data[device]['max_seq']:
             self.device_data[device]['max_seq'] = seq
 
@@ -62,8 +65,11 @@ class MetricsCollector:
         return sum(self.jitter_values[msg_type]) / len(self.jitter_values[msg_type])
 
     def calculate_loss_rate(self, msg_type):
-        """Calculate packet loss per-device then aggregate by message type"""
-        # Per-device packet loss tracking
+        """Calculate packet loss per-device then aggregate by message type
+        
+        Uses range-based calculation: expected = max_seq - min_seq + 1
+        This correctly handles cases where sequence doesn't start from 0.
+        """
         loss_by_type = []
         total_expected = 0
         total_received = 0
@@ -73,11 +79,14 @@ class MetricsCollector:
         for device, data in self.device_data.items():
             if data['type'] == msg_type:
                 num_devices += 1
+                min_seq = data['min_seq']
                 max_seq = data['max_seq']
-                if max_seq < 0:
+                
+                if max_seq < 0 or min_seq == float('inf'):
                     continue
 
-                expected = max_seq + 1  # seq starts from 0
+                # Correct formula: only count the range we actually saw
+                expected = max_seq - min_seq + 1
                 received = len(data['received_seq'])
                 lost = expected - received
                 loss_rate = (lost / expected * 100) if expected > 0 else 0
