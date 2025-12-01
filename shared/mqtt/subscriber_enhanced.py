@@ -24,12 +24,13 @@ CONFIG = {
 class MetricsCollector:
     def __init__(self):
         self.delays = {'anomaly': [], 'normal': []}
-        # Per-device tracking for correct packet loss calculation
+        # Per-device tracking for correct packet loss calculation AND per-sensor metrics
         self.device_data = defaultdict(lambda: {
             'type': None,
             'received_seq': set(),
-            'min_seq': float('inf'),  # Track min sequence
-            'max_seq': -1
+            'min_seq': float('inf'),
+            'max_seq': -1,
+            'delays': []  # Track delays per device for per-sensor metrics
         })
         self.first_timestamp = None
         self.last_timestamp = None
@@ -41,9 +42,10 @@ class MetricsCollector:
         self.delays[msg_type].append(delay)
         self.message_count += 1
 
-        # Per-device sequence tracking
+        # Per-device sequence and delay tracking
         self.device_data[device]['type'] = msg_type
         self.device_data[device]['received_seq'].add(seq)
+        self.device_data[device]['delays'].append(delay)
         if seq < self.device_data[device]['min_seq']:
             self.device_data[device]['min_seq'] = seq
         if seq > self.device_data[device]['max_seq']:
@@ -139,6 +141,97 @@ class MetricsCollector:
 
         return summary
 
+    def get_per_sensor_metrics(self):
+        """Get per-sensor metrics sorted by highest average delay"""
+        sensor_metrics = []
+        
+        for device, data in self.device_data.items():
+            if not data['delays']:
+                continue
+                
+            delays = data['delays']
+            min_seq = data['min_seq']
+            max_seq = data['max_seq']
+            
+            # Calculate packet loss
+            if max_seq >= 0 and min_seq != float('inf'):
+                expected = max_seq - min_seq + 1
+                received = len(data['received_seq'])
+                lost = expected - received
+                loss_rate = (lost / expected * 100) if expected > 0 else 0
+            else:
+                expected = received = lost = 0
+                loss_rate = 0
+            
+            avg_delay = sum(delays) / len(delays)
+            
+            sensor_metrics.append({
+                'device': device,
+                'type': data['type'],
+                'avg_delay': avg_delay,
+                'min_delay': min(delays),
+                'max_delay': max(delays),
+                'count': len(delays),
+                'expected': expected,
+                'lost': lost,
+                'loss_rate': loss_rate
+            })
+        
+        # Sort by highest average delay
+        sensor_metrics.sort(key=lambda x: x['avg_delay'], reverse=True)
+        return sensor_metrics
+
+    def get_per_floor_metrics(self):
+        """Get per-floor aggregated metrics"""
+        floor_data = defaultdict(lambda: {
+            'anomaly': {'delays': [], 'received': 0, 'expected': 0, 'lost': 0},
+            'normal': {'delays': [], 'received': 0, 'expected': 0, 'lost': 0}
+        })
+        
+        for device, data in self.device_data.items():
+            if not data['delays']:
+                continue
+            
+            # Extract floor from device name (e.g., sensor_f1r1_anomaly -> floor 1)
+            try:
+                floor = device.split('_')[1][1]  # Get 'f1' -> '1'
+            except:
+                floor = '?'
+            
+            msg_type = data['type']
+            min_seq = data['min_seq']
+            max_seq = data['max_seq']
+            
+            if max_seq >= 0 and min_seq != float('inf'):
+                expected = max_seq - min_seq + 1
+                received = len(data['received_seq'])
+                lost = expected - received
+            else:
+                expected = received = lost = 0
+            
+            floor_data[floor][msg_type]['delays'].extend(data['delays'])
+            floor_data[floor][msg_type]['received'] += received
+            floor_data[floor][msg_type]['expected'] += expected
+            floor_data[floor][msg_type]['lost'] += lost
+        
+        # Calculate averages
+        result = {}
+        for floor in sorted(floor_data.keys()):
+            result[floor] = {}
+            for msg_type in ['anomaly', 'normal']:
+                fd = floor_data[floor][msg_type]
+                if fd['delays']:
+                    loss_rate = (fd['lost'] / fd['expected'] * 100) if fd['expected'] > 0 else 0
+                    result[floor][msg_type] = {
+                        'avg_delay': sum(fd['delays']) / len(fd['delays']),
+                        'count': len(fd['delays']),
+                        'loss_rate': loss_rate
+                    }
+                else:
+                    result[floor][msg_type] = None
+        
+        return result
+
 metrics = MetricsCollector()
 
 # CSV Header
@@ -221,6 +314,41 @@ def cleanup(signal_num=None, frame=None):
     print(f"  Total Messages    : {summary['total']['total_messages']}")
     print(f"  Throughput        : {summary['total']['throughput']:.2f} msg/s")
 
+    # Get per-sensor and per-floor metrics
+    sensor_metrics = metrics.get_per_sensor_metrics()
+    floor_metrics = metrics.get_per_floor_metrics()
+
+    # Print per-sensor metrics (top 10 highest delay)
+    print("\n" + "=" * 70)
+    print(" " * 15 + "PER-SENSOR METRICS (Top 10 by Delay)")
+    print("=" * 70)
+    print(f"{'Device':<35} {'Type':<8} {'Avg Delay':>12} {'Count':>8} {'Loss%':>8}")
+    print("-" * 70)
+    for s in sensor_metrics[:10]:
+        print(f"{s['device']:<35} {s['type']:<8} {s['avg_delay']:>10.2f}ms {s['count']:>8} {s['loss_rate']:>7.2f}%")
+
+    # Print per-floor metrics
+    print("\n" + "=" * 70)
+    print(" " * 20 + "PER-FLOOR SUMMARY")
+    print("=" * 70)
+    print(f"{'Floor':<8} {'Type':<10} {'Avg Delay':>12} {'Count':>8} {'Loss%':>8}")
+    print("-" * 70)
+    for floor, data in floor_metrics.items():
+        for msg_type in ['anomaly', 'normal']:
+            if data.get(msg_type):
+                m = data[msg_type]
+                print(f"Floor {floor:<3} {msg_type:<10} {m['avg_delay']:>10.2f}ms {m['count']:>8} {m['loss_rate']:>7.2f}%")
+
+    # Calculate QoS improvement
+    if summary['anomaly'] and summary['normal']:
+        anomaly_delay = summary['anomaly']['avg_delay']
+        normal_delay = summary['normal']['avg_delay']
+        if normal_delay > 0:
+            improvement = (normal_delay - anomaly_delay) / normal_delay * 100
+            print("\n" + "=" * 70)
+            print(f"  QoS IMPROVEMENT: {improvement:.1f}% lower delay for anomaly traffic")
+            print("=" * 70)
+
     # Save to file
     with open(SUMMARY_FILE, "w") as f:
         f.write("=" * 70 + "\n")
@@ -269,6 +397,37 @@ def cleanup(signal_num=None, frame=None):
         f.write(f"  Duration          : {summary['total']['duration']:.2f} s\n")
         f.write(f"  Total Messages    : {summary['total']['total_messages']}\n")
         f.write(f"  Throughput        : {summary['total']['throughput']:.2f} msg/s\n")
+
+        # Write per-sensor metrics
+        f.write("\n" + "=" * 70 + "\n")
+        f.write(" " * 15 + "PER-SENSOR METRICS (Sorted by Delay)\n")
+        f.write("=" * 70 + "\n")
+        f.write(f"{'Device':<35} {'Type':<8} {'Avg Delay':>12} {'Count':>8} {'Loss%':>8}\n")
+        f.write("-" * 70 + "\n")
+        for s in sensor_metrics:
+            f.write(f"{s['device']:<35} {s['type']:<8} {s['avg_delay']:>10.2f}ms {s['count']:>8} {s['loss_rate']:>7.2f}%\n")
+
+        # Write per-floor metrics
+        f.write("\n" + "=" * 70 + "\n")
+        f.write(" " * 20 + "PER-FLOOR SUMMARY\n")
+        f.write("=" * 70 + "\n")
+        f.write(f"{'Floor':<8} {'Type':<10} {'Avg Delay':>12} {'Count':>8} {'Loss%':>8}\n")
+        f.write("-" * 70 + "\n")
+        for floor, data in floor_metrics.items():
+            for msg_type in ['anomaly', 'normal']:
+                if data.get(msg_type):
+                    m = data[msg_type]
+                    f.write(f"Floor {floor:<3} {msg_type:<10} {m['avg_delay']:>10.2f}ms {m['count']:>8} {m['loss_rate']:>7.2f}%\n")
+
+        # Write QoS improvement
+        if summary['anomaly'] and summary['normal']:
+            anomaly_delay = summary['anomaly']['avg_delay']
+            normal_delay = summary['normal']['avg_delay']
+            if normal_delay > 0:
+                improvement = (normal_delay - anomaly_delay) / normal_delay * 100
+                f.write("\n" + "=" * 70 + "\n")
+                f.write(f"  QoS IMPROVEMENT: {improvement:.1f}% lower delay for anomaly traffic\n")
+                f.write("=" * 70 + "\n")
 
     print(f"\n" + "=" * 70)
     print(f"Metrics saved to:")
