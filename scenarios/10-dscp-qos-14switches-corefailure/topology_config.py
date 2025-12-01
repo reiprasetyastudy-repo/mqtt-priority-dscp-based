@@ -4,6 +4,30 @@ Scenario 10: DSCP-Based QoS with Dual Core - Core Failure Test
 
 Same topology as Scenario 09, but with Core Switch failure simulation.
 
+Topology:
+                    MQTT Broker
+                         │
+                  ┌──────┴──────┐
+                  │             │
+              ┌───┴───┐     ┌───┴───┐
+              │  s1   │─────│  s2   │  CORE (2 switches)
+              └───┬───┘     └───┬───┘
+                  │╲           ╱│
+                  │ ╲─────────╱ │
+                  │  ╲       ╱  │
+                  │   ╲     ╱   │
+              ┌───┼─────╳──────┼───┐
+              │   │    ╱ ╲     │   │
+              ▼   ▼   ▼   ▼    ▼   ▼
+          ┌───────┐ ┌───────┐ ┌───────┐
+          │  s3   │ │  s4   │ │  s5   │  DISTRIBUTION
+          │Floor 1│ │Floor 2│ │Floor 3│  Each connects to BOTH cores
+          └───┬───┘ └───┬───┘ └───┬───┘
+              │         │         │
+        ┌─────┼───┐ ┌───┼───┐ ┌───┼─────┐
+        │     │   │ │   │   │ │   │     │
+       s6    s7  s8 s9 s10 s11 s12 s13  s14  EDGE (9 switches)
+
 Test Phases:
 - Phase 1 (0-30s): Normal operation - both cores active
 - Phase 2 (30s+): Core 2 (s2) disabled - traffic via Core 1 only

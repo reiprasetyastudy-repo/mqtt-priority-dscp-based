@@ -9,29 +9,73 @@ Topology (from tier 2.png):
 - Total: 14 switches, 19 hosts (1 broker + 18 publishers)
 
 Network Design:
-                    MQTT Broker (h_broker)
+
+                         MQTT Broker + Subscriber
+                                  │
+                  ┌───────────────┴───────────────┐
+                  │                               │
+              ┌───┴───┐                       ┌───┴───┐
+              │  s1   │───────────────────────│  s2   │
+              │ Core1 │                       │ Core2 │
+              └───┬───┘                       └───┬───┘
+                  │                               │
+       ┌──────────┼──────────┬──────────┬────────┼──────────┐
+       │          │          │          │        │          │
+       │          │          │          │        │          │
+       ▼          ▼          ▼          ▼        ▼          ▼
+   ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐
+   │  s3   │  │  s3   │  │  s4   │  │  s4   │  │  s5   │  │  s5   │
+   │(from  │  │(from  │  │(from  │  │(from  │  │(from  │  │(from  │
+   │  s1)  │  │  s2)  │  │  s1)  │  │  s2)  │  │  s1)  │  │  s2)  │
+   └───────┘  └───────┘  └───────┘  └───────┘  └───────┘  └───────┘
+        ╲         ╱           ╲         ╱           ╲         ╱
+         ╲       ╱             ╲       ╱             ╲       ╱
+          ╲     ╱               ╲     ╱               ╲     ╱
+       ┌───────┐             ┌───────┐             ┌───────┐
+       │  s3   │             │  s4   │             │  s5   │
+       │Floor 1│             │Floor 2│             │Floor 3│
+       └───┬───┘             └───┬───┘             └───┬───┘
+           │                     │                     │
+     ┌─────┼─────┐         ┌─────┼─────┐         ┌─────┼─────┐
+     │     │     │         │     │     │         │     │     │
+    s6    s7    s8        s9   s10   s11       s12   s13   s14
+     │     │     │         │     │     │         │     │     │
+    2h    2h    2h        2h    2h    2h        2h    2h    2h
+
+Simplified View (actual connections):
+
+                    MQTT Broker
                          │
-              ┌──────────┴──────────┐
-              │                     │
-          ┌───┴───┐             ┌───┴───┐
-          │  s1   │─────────────│  s2   │  CORE (dual)
-          │ Core1 │             │ Core2 │
-          └───┬───┘             └───┬───┘
-              │╲                  ╱│
-              │ ╲                ╱ │
-              │  ╲    ┌────┐   ╱  │
-              │   ╲───│ s4 │──╱   │
-              │       │Fl.2│      │
-          ┌───┴───┐   └──┬─┘  ┌───┴───┐
-          │  s3   │      │    │  s5   │  DISTRIBUTION
-          │Floor 1│      │    │Floor 3│
-          └───┬───┘      │    └───┬───┘
-              │          │        │
-        ┌─────┼─────┐    │  ┌─────┼─────┐
-        │     │     │    │  │     │     │
-       s6    s7    s8   s9-s11  s12   s13   s14    EDGE
-       │     │     │    │  │  │  │     │     │
-      2h    2h    2h   2h 2h 2h 2h    2h    2h    HOSTS
+                  ┌──────┴──────┐
+                  │             │
+              ┌───┴───┐     ┌───┴───┐
+              │  s1   │─────│  s2   │  CORE (2 switches)
+              └───┬───┘     └───┬───┘
+                  │╲           ╱│
+                  │ ╲─────────╱ │
+                  │  ╲       ╱  │
+                  │   ╲     ╱   │
+                  │    ╲   ╱    │
+              ┌───┼─────╳──────┼───┐
+              │   │    ╱ ╲     │   │
+              ▼   ▼   ▼   ▼    ▼   ▼
+          ┌───────┐ ┌───────┐ ┌───────┐
+          │  s3   │ │  s4   │ │  s5   │  DISTRIBUTION (3 switches)
+          │Floor 1│ │Floor 2│ │Floor 3│  Each connects to BOTH cores!
+          └───┬───┘ └───┬───┘ └───┬───┘
+              │         │         │
+        ┌─────┼───┐ ┌───┼───┐ ┌───┼─────┐
+        │     │   │ │   │   │ │   │     │
+       s6    s7  s8 s9 s10 s11 s12 s13  s14  EDGE (9 switches)
+
+Connections Summary:
+- Broker → s1
+- s1 ↔ s2 (core interconnect)
+- s1 → s3, s4, s5 (core1 to all distributions)
+- s2 → s3, s4, s5 (core2 to all distributions)
+- s3 → s6, s7, s8 (floor 1)
+- s4 → s9, s10, s11 (floor 2)
+- s5 → s12, s13, s14 (floor 3)
 
 Redundancy:
 - Each distribution switch connects to BOTH core switches
