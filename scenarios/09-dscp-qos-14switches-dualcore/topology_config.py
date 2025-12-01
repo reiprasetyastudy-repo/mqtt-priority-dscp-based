@@ -49,13 +49,12 @@ Simplified View (actual connections):
                   ┌──────┴──────┐
                   │             │
               ┌───┴───┐     ┌───┴───┐
-              │  s1   │─────│  s2   │  CORE (2 switches)
+              │  s1   │     │  s2   │  CORE (2 switches, NOT connected to each other)
               └───┬───┘     └───┬───┘
                   │╲           ╱│
                   │ ╲─────────╱ │
                   │  ╲       ╱  │
                   │   ╲     ╱   │
-                  │    ╲   ╱    │
               ┌───┼─────╳──────┼───┐
               │   │    ╱ ╲     │   │
               ▼   ▼   ▼   ▼    ▼   ▼
@@ -68,9 +67,9 @@ Simplified View (actual connections):
         │     │   │ │   │   │ │   │     │
        s6    s7  s8 s9 s10 s11 s12 s13  s14  EDGE (9 switches)
 
-Connections Summary:
-- Broker → s1
-- s1 ↔ s2 (core interconnect)
+Connections Summary (Non-Stacking):
+- Broker → s1 AND s2 (dual-homed for redundancy)
+- s1 and s2 are NOT connected to each other (non-stacking)
 - s1 → s3, s4, s5 (core1 to all distributions)
 - s2 → s3, s4, s5 (core2 to all distributions)
 - s3 → s6, s7, s8 (floor 1)
@@ -206,13 +205,15 @@ class DualCoreTopology:
         
         bw = LINK_BANDWIDTH_MBPS
         
-        # Broker to Core 1
+        # Broker to BOTH Core switches (for redundancy)
         self.net.addLink(self.hosts['broker'], self.switches['s1'], bw=bw)
+        self.net.addLink(self.hosts['broker'], self.switches['s2'], bw=bw)
         info('  - Broker -> s1 (Core1)\n')
+        info('  - Broker -> s2 (Core2)\n')
         
-        # Core interconnect (s1 <-> s2)
-        self.net.addLink(self.switches['s1'], self.switches['s2'], bw=bw)
-        info('  - s1 (Core1) <-> s2 (Core2)\n')
+        # Non-stacking: Core switches are NOT directly connected
+        # Redundancy is provided via distribution switches
+        info('  - s1 and s2 NOT connected (non-stacking design)\n')
         
         # Core to Distribution links (each distribution connects to BOTH cores)
         for dist in ['s3', 's4', 's5']:

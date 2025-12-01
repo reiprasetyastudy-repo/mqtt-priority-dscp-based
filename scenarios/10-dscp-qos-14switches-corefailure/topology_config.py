@@ -4,13 +4,14 @@ Scenario 10: DSCP-Based QoS with Dual Core - Core Failure Test
 
 Same topology as Scenario 09, but with Core Switch failure simulation.
 
-Topology:
+Topology (Non-Stacking - cores NOT connected to each other):
+
                     MQTT Broker
                          │
                   ┌──────┴──────┐
                   │             │
               ┌───┴───┐     ┌───┴───┐
-              │  s1   │─────│  s2   │  CORE (2 switches)
+              │  s1   │     │  s2   │  CORE (2 switches, broker connects to both)
               └───┬───┘     └───┬───┘
                   │╲           ╱│
                   │ ╲─────────╱ │
@@ -153,14 +154,14 @@ class DualCoreFailureTopology:
         
         bw = LINK_BANDWIDTH_MBPS
         
-        # Broker to Core 1
+        # Broker to BOTH Core switches (for redundancy)
         self.net.addLink(self.hosts['broker'], self.switches['s1'], bw=bw)
+        self.net.addLink(self.hosts['broker'], self.switches['s2'], bw=bw)
         info('  - Broker -> s1 (Core1)\n')
+        info('  - Broker -> s2 (Core2)\n')
         
-        # Core interconnect - this link will be disabled
-        link_core = self.net.addLink(self.switches['s1'], self.switches['s2'], bw=bw)
-        self.core2_links.append(('s1', 's2', link_core))
-        info('  - s1 <-> s2 (Core interconnect - will be disabled)\n')
+        # Non-stacking: Core switches are NOT directly connected
+        info('  - s1 and s2 NOT connected (non-stacking design)\n')
         
         # Core to Distribution links
         for dist in ['s3', 's4', 's5']:
