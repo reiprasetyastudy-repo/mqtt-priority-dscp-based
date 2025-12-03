@@ -1,0 +1,48 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : Unknown
+  Topology          : Unknown
+  Switches          : Unknown
+  Publishers        : Unknown
+  Bandwidth Limit   : Unknown
+  QoS Queues        : Unknown
+
+======================================================================
+
+ANOMALY:
+  Messages Received : 1113
+  Avg Delay         : 2.06 ms
+  Min Delay         : 1.12 ms
+  Max Delay         : 6.17 ms
+  Std Dev Delay     : 0.38 ms
+  Avg Jitter        : 0.28 ms
+  Max Seq Number    : 1112
+
+  PACKET LOSS:
+    Expected        : 1113 messages
+    Received        : 1113 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Messages Received : 60
+  Avg Delay         : 2.42 ms
+  Min Delay         : 1.96 ms
+  Max Delay         : 3.91 ms
+  Std Dev Delay     : 0.35 ms
+  Avg Jitter        : 0.30 ms
+  Max Seq Number    : 59
+
+  PACKET LOSS:
+    Expected        : 60 messages
+    Received        : 60 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+TOTAL:
+  Duration          : 59.82 s
+  Total Messages    : 1173
+  Throughput        : 19.61 msg/s

@@ -5,240 +5,119 @@ DSCP-based QoS framework untuk memprioritaskan traffic MQTT pada jaringan Softwa
 ## Fitur Utama
 
 - **DSCP-based Priority**: Standar industri (RFC 2474) untuk prioritas paket
-- **5 Level Prioritas**: DSCP 46 (Very High) sampai DSCP 0 (Best Effort)
-- **Ring Topology**: Redundansi dengan failover otomatis
-- **Link Failure Test**: Simulasi kegagalan link untuk uji redundansi
-- **Metrics Collection**: Delay, Jitter, Packet Loss, Throughput
-
-## Requirements
-
-### System Requirements
-- Ubuntu 20.04 / 22.04 LTS
-- Python 3.9+
-- RAM minimal 4GB
-- Disk 10GB free space
-
-### Software Dependencies
-```bash
-# Install system packages
-sudo apt update
-sudo apt install -y mininet openvswitch-switch mosquitto mosquitto-clients python3-pip python3-venv git
-```
-
-## Setup
-
-### 1. Clone Repository
-```bash
-git clone https://github.com/reiprasetyastudy-repo/mqtt-priority-dscp-based.git
-cd mqtt-priority-dscp-based
-```
-
-### 2. Create Virtual Environment (Recommended)
-```bash
-# Buat virtual environment
-python3 -m venv venv
-
-# Aktivasi virtual environment
-source venv/bin/activate
-
-# Install Python dependencies
-pip install -r requirements.txt
-```
-
-### 3. Setup Ryu Controller
-```bash
-# Jika menggunakan venv terpisah untuk Ryu (Python 3.9)
-python3.9 -m venv ryu-venv
-source ryu-venv/bin/activate
-pip install ryu
-```
-
-### 4. Verify Installation
-```bash
-# Cek Mininet
-sudo mn --version
-
-# Cek Open vSwitch
-sudo ovs-vsctl --version
-
-# Cek Mosquitto
-mosquitto -h
-
-# Cek Ryu (dalam venv)
-ryu-manager --version
-```
+- **2 Level Prioritas**: DSCP 46 (Anomaly/Critical) dan DSCP 0 (Normal/Best Effort)
+- **6 Skenario**: Baseline, Lossy, Dual-Core, Core Failure, Dual-Redundant, Dist Failure
+- **Modular Architecture**: Shared modules untuk DRY principle
+- **Accurate Metrics**: Delay, Jitter, Packet Loss dengan publisher log verification
 
 ## Quick Start
 
-### Skenario 06: High Congestion (Recommended untuk Thesis)
-
 ```bash
-# 1. Masuk ke folder skenario
-cd /home/mqtt-sdn/scenarios/06-dscp-qos-13switches
-
-# 2. Jalankan eksperimen (60 detik = 2 menit total dengan drain time)
+# 1. Run experiment (1 minute test)
+cd /home/mqtt-sdn/scenarios/01-baseline-13switches
 sudo ./run_experiment.sh 60
 
-# 3. Lihat hasil
-cat /home/mqtt-sdn/results/06-dscp-qos-13switches/run_*/metrics_summary.txt
-
-# 4. Generate summary detail dengan per-sensor metrics
-cd /home/mqtt-sdn
-python3 generate_summary_manual_v2.py results/06-dscp-qos-13switches/run_*/mqtt_metrics_log.csv
+# 2. View results
+cat results/01-baseline-13switches/run_*/metrics_summary.txt
 ```
 
-**Konfigurasi Skenario 06:**
-- Bandwidth: 0.5 Mbps (high congestion)
-- 18 publishers (9 anomaly DSCP 46 + 9 normal DSCP 0)
-- 13 switches (1 core + 3 aggregation + 9 edge)
-- Message rate: 50 msg/s per publisher
+## Skenario
 
-### Skenario Lainnya
+| # | Nama | Deskripsi | Switches |
+|---|------|-----------|----------|
+| 01 | Baseline | Normal hierarchical topology | 13 |
+| 02 | Lossy | Packet loss (10% core, 5% edge) | 13 |
+| 03 | Dual-Core | 2 core switches with STP | 14 |
+| 04 | Core Failure | Core 1 fails at 150s | 14 |
+| 05 | Dual-Redundant | Full redundancy all layers | 17 |
+| 06 | Dist Failure | Distribution layer failure | 17 |
 
-```bash
-# Skenario 07: Core Bottleneck
-cd /home/mqtt-sdn/scenarios/07-dscp-qos-13switches-core-bottleneck
-sudo ./run_experiment.sh 60
+## Parameter Standard
 
-# Skenario 08: Lossy Network (5% packet loss)
-cd /home/mqtt-sdn/scenarios/08-dscp-qos-13switches-lossy
-sudo ./run_experiment.sh 60
-
-# Skenario 09: Ring Topology (redundansi)
-cd /home/mqtt-sdn/scenarios/09-dscp-qos-13switches-ring
-sudo ./run_experiment.sh 60
-
-# Skenario 10: Link Failure Test
-cd /home/mqtt-sdn/scenarios/10-dscp-qos-13switches-linkfailure
-sudo ./run_experiment.sh 60
+```python
+LINK_BANDWIDTH_MBPS = 0.2    # 200 Kbps
+MSG_RATE = 10                # 10 msg/s per publisher
+DURATION = 300               # 5 minutes send
+DRAIN_RATIO = 1.0            # 5 minutes drain
 ```
 
-### Lihat Hasil
-```bash
-# Summary otomatis (ganti XX dengan nomor skenario)
-cat /home/mqtt-sdn/results/XX-*/run_*/metrics_summary.txt
-
-# Generate summary detail per-sensor
-python3 generate_summary_manual_v2.py results/XX-*/run_*/mqtt_metrics_log.csv
-
-# Untuk skenario 10 (link failure), gunakan script khusus:
-python3 generate_summary_linkfailure.py results/10-*/run_*/mqtt_metrics_log.csv
-```
-
-## Skenario yang Tersedia
-
-| Skenario | Deskripsi | Topologi |
-|----------|-----------|----------|
-| 06 | High congestion (0.5 Mbps) | 13 switches |
-| 07 | Core bottleneck | 13 switches |
-| 08 | Lossy network (5% loss) | 13 switches |
-| **09** | **Ring topology + STP** | 13 switches (ring) |
-| **10** | **Link failure test** | 13 switches (ring) |
-
-## Arsitektur
-
-```
-Publishers (DSCP tagging) → SDN Switches (Queue mapping) → Broker
-         ↓                           ↓
-    DSCP 46 (anomaly)          Queue 1 (60-80% BW)
-    DSCP 0  (normal)           Queue 5 (5-15% BW)
-```
-
-## Topologi Ring (Skenario 09-10)
-
-```
-                    ┌──────┐
-                    │  s1  │ CORE (Broker)
-                    └───┬──┘
-          ┌─────────────┼─────────────┐
-      ┌───▼───┐     ┌───▼───┐     ┌───▼───┐
-      │  s2   │←───→│  s3   │←───→│  s4   │  RING
-      └───┬───┘←─────────────────→└───┬───┘
-          │             │             │
-       s5-s7         s8-s10       s11-s13    EDGE
-      (Floor1)      (Floor2)      (Floor3)
-```
-
-## Hasil yang Diharapkan
+## Expected Results
 
 ```
 ANOMALY (DSCP 46):
-  Avg Delay: ~4,000 ms
   Packet Loss: 0%
+  Avg Delay:   ~200ms
 
 NORMAL (DSCP 0):
-  Avg Delay: ~10,000 ms
-  Packet Loss: 0%
-
-QoS Improvement: ~60% lower delay untuk anomaly
+  Packet Loss: ~76%
+  Avg Delay:   ~27,000ms
 ```
 
-## Struktur Direktori
+## Project Structure
 
 ```
-mqtt-priority-dscp-based/
-├── scenarios/                    # Skenario eksperimen
-│   ├── 06-dscp-qos-13switches/
-│   ├── 07-dscp-qos-13switches-core-bottleneck/
-│   ├── 08-dscp-qos-13switches-lossy/
-│   ├── 09-dscp-qos-13switches-ring/
-│   └── 10-dscp-qos-13switches-linkfailure/
-├── shared/                       # Shared components
-│   ├── mqtt/                     # Publisher & Subscriber
-│   └── config/                   # Konfigurasi
-├── docs/                         # Dokumentasi
-│   └── SKENARIO_09_10_GUIDE.md  # Panduan lengkap
-├── results/                      # Hasil eksperimen (gitignored)
-├── generate_summary_*.py         # Script analisis
-├── requirements.txt              # Python dependencies
-└── README.md                     # File ini
+mqtt-sdn/
+├── scenarios/
+│   ├── 01-baseline-13switches/
+│   ├── 02-lossy-13switches/
+│   ├── 03-dualcore-14switches/
+│   ├── 04-corefailure-14switches/
+│   ├── 05-dualredundant-17switches/
+│   └── 06-distfailure-17switches/
+├── shared/
+│   ├── config/      # defaults.py, naming.py
+│   ├── mqtt/        # publisher_dscp.py, subscriber_enhanced.py
+│   ├── sdn/         # controller.py
+│   ├── topology/    # base.py, qos.py
+│   └── analysis/    # metrics.py, packet_loss.py, export.py
+├── results/         # Experiment results
+├── generate_summary.py
+├── CONTEXT.md       # Project context
+└── README.md
 ```
 
-## Dokumentasi
+## Running Experiments
 
-- **[SKENARIO_09_10_GUIDE.md](docs/SKENARIO_09_10_GUIDE.md)** - Panduan lengkap Skenario 09 dan 10
-- **[CONTEXT.md](CONTEXT.md)** - Konteks proyek
-- **[CLAUDE.md](CLAUDE.md)** - Panduan teknis
-
-## Troubleshooting
-
-### "No route to host"
+### Single Scenario
 ```bash
-# Tunggu STP convergence (35 detik)
-# Atau cek flow rules:
-sudo ovs-ofctl -O OpenFlow13 dump-flows s1
+cd /home/mqtt-sdn/scenarios/01-baseline-13switches
+sudo ./run_experiment.sh 300  # 5 min send + 5 min drain
 ```
 
-### Hasil kosong
+### Generate Summary
 ```bash
-# Cleanup dan coba lagi
+python3 generate_summary.py results/01-*/run_*/mqtt_metrics_log.csv
+```
+
+### Cleanup
+```bash
 sudo mn -c
 sudo pkill -f ryu-manager
+sudo pkill -f mosquitto
 ```
 
-### Permission denied
-```bash
-# Jalankan dengan sudo
-sudo ./run_experiment.sh 60
+## Architecture
+
+```
+Publishers ──────────────────► SDN Switches ──────────────────► Broker
+(DSCP tagging)                 (Queue mapping)                  (Subscriber)
+    │                              │
+    ├── DSCP 46 (anomaly) ────────► Queue 1 (60-80% BW)
+    └── DSCP 0  (normal)  ────────► Queue 5 (5-15% BW)
 ```
 
-## Cleanup
+## Requirements
 
-```bash
-# Stop semua komponen
-sudo ./stop_sdn_mqtt.sh
+- Ubuntu 20.04/22.04 LTS
+- Python 3.9+ (Ryu), Python 3.12 (System)
+- Mininet, Open vSwitch, Mosquitto
+- Ryu Controller (in virtualenv)
 
-# Cleanup Mininet
-sudo mn -c
+## Documentation
 
-# Kill controller
-sudo pkill -f ryu-manager
-```
-
-## License
-
-Research/Educational Project
+- [CONTEXT.md](CONTEXT.md) - Full project context
+- [docs/](docs/) - Additional documentation
 
 ---
 
-**Last Updated**: 2025-12-01
+**Last Updated**: 2025-12-03

@@ -1,0 +1,149 @@
+======================================================================
+LINK FAILURE TEST LOG - Scenario 10
+======================================================================
+
+Link disabled: s2-eth1
+Phase 1 duration: 30 seconds
+
+======================================================================
+EVENTS:
+======================================================================
+
+[2025-12-01 00:39:43.915] [PHASE] === PHASE 1: Normal Operation (30s) ===
+[2025-12-01 00:39:43.916] [PHASE] All links active. Traffic uses direct path to core.
+[2025-12-01 00:40:08.916] [PHASE] Capturing statistics before link failure...
+[2025-12-01 00:40:08.917] [ROUTE] === ROUTE ANALYSIS: BEFORE LINK FAILURE ===
+[2025-12-01 00:40:08.934] [ROUTE] Switch s2 port mapping:
+[2025-12-01 00:40:08.934] [ROUTE]   s2-eth1 = s2 ↔ s1 (Core) - PRIMARY
+[2025-12-01 00:40:08.935] [ROUTE]   s2-eth2 = s2 ↔ s3 (Ring) - BACKUP
+[2025-12-01 00:40:08.935] [ROUTE]   s2-eth3 = s2 ↔ s4 (Ring) - BACKUP
+[2025-12-01 00:40:08.935] [ROUTE] Port statistics: {'OFPST_PORT reply (OF1.3) (xid=0x2)': {'rx': 133, 'tx': 0}, '1': {'rx': 320, 'tx': 0}, '6': {'rx': 243, 'tx': 0}, '4': {'rx': 356, 'tx': 0}, '2': {'rx': 1051, 'tx': 0}, '5': {'rx': 304, 'tx': 0}, '3': {'rx': 260, 'tx': 0}}
+[2025-12-01 00:40:08.935] [STATS] === PORT STATISTICS: BEFORE LINK FAILURE ===
+[2025-12-01 00:40:08.947] [STATS] s1:
+[2025-12-01 00:40:08.948] [STATS]   port LOCAL: rx pkts=87, bytes=4493, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.948] [STATS]   port  4: rx pkts=260, bytes=22961, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.948] [STATS]   port  1: rx pkts=1978, bytes=165920, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.948] [STATS]   port  2: rx pkts=38, bytes=3096, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.948] [STATS]   port  3: rx pkts=2101, bytes=1707374, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.957] [STATS] s2:
+[2025-12-01 00:40:08.957] [STATS]   port LOCAL: rx pkts=133, bytes=6885, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.958] [STATS]   port  1: rx pkts=320, bytes=43583, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.958] [STATS]   port  6: rx pkts=244, bytes=199539, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.958] [STATS]   port  4: rx pkts=356, bytes=228983, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.958] [STATS]   port  2: rx pkts=1052, bytes=97608, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.958] [STATS]   port  5: rx pkts=304, bytes=218475, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.958] [STATS]   port  3: rx pkts=260, bytes=22961, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.971] [STATS] s3:
+[2025-12-01 00:40:08.971] [STATS]   port LOCAL: rx pkts=204, bytes=10546, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.971] [STATS]   port  4: rx pkts=245, bytes=198772, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.971] [STATS]   port  6: rx pkts=220, bytes=171994, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.971] [STATS]   port  1: rx pkts=1980, bytes=165879, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.971] [STATS]   port  2: rx pkts=891, bytes=646131, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.971] [STATS]   port  5: rx pkts=211, bytes=185402, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.971] [STATS]   port  3: rx pkts=608, bytes=539116, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.979] [STATS] s4:
+[2025-12-01 00:40:08.979] [STATS]   port LOCAL: rx pkts=206, bytes=10650, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.979] [STATS]   port  4: rx pkts=174, bytes=167276, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.980] [STATS]   port  1: rx pkts=12, bytes=900, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.980] [STATS]   port  6: rx pkts=197, bytes=166165, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.980] [STATS]   port  2: rx pkts=793, bytes=77861, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.980] [STATS]   port  5: rx pkts=267, bytes=208042, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:08.980] [STATS]   port  3: rx pkts=38, bytes=3096, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:13.980] [PHASE] === LINK FAILURE EVENT ===
+[2025-12-01 00:40:13.981] [LINK_FAILURE] Disabling link s2-eth1...
+[2025-12-01 00:40:13.981] [VERIFY] Link status BEFORE disable:
+[2025-12-01 00:40:14.015] [VERIFY]   ip link show: UP
+[2025-12-01 00:40:14.015] [VERIFY]   operstate: up
+[2025-12-01 00:40:14.015] [VERIFY]   ovs-vsctl: checked
+[2025-12-01 00:40:14.020] [LINK_FAILURE] Link s2-eth1 disabled successfully
+[2025-12-01 00:40:15.021] [VERIFY] Link status AFTER disable:
+[2025-12-01 00:40:15.045] [VERIFY]   ip link show: DOWN
+[2025-12-01 00:40:15.045] [VERIFY]   operstate: down
+[2025-12-01 00:40:15.045] [VERIFY]   ovs-vsctl: checked
+[2025-12-01 00:40:15.045] [VERIFY] Checking OVS flow rules on s2:
+[2025-12-01 00:40:15.057] [VERIFY]   Flow count: 8 rules
+[2025-12-01 00:40:15.057] [PHASE] === PHASE 2: Redundancy Test (90s) ===
+[2025-12-01 00:40:15.058] [PHASE] Link s2↔s1 is DOWN. Floor 1 traffic must use ring.
+[2025-12-01 00:40:15.058] [PHASE] Expected path: s2 → s3 → s1 or s2 → s4 → s1
+[2025-12-01 00:40:15.058] [PHASE] Waiting 10s for STP reconvergence after link failure...
+[2025-12-01 00:40:25.058] [PHASE] Capturing statistics after link failure (post STP reconvergence)...
+[2025-12-01 00:40:25.058] [ROUTE] === ROUTE ANALYSIS: AFTER LINK FAILURE (10s) ===
+[2025-12-01 00:40:25.076] [ROUTE] Switch s2 port mapping:
+[2025-12-01 00:40:25.076] [ROUTE]   s2-eth1 = s2 ↔ s1 (Core) - PRIMARY
+[2025-12-01 00:40:25.076] [ROUTE]   s2-eth2 = s2 ↔ s3 (Ring) - BACKUP
+[2025-12-01 00:40:25.077] [ROUTE]   s2-eth3 = s2 ↔ s4 (Ring) - BACKUP
+[2025-12-01 00:40:25.077] [ROUTE] Port statistics: {'OFPST_PORT reply (OF1.3) (xid=0x2)': {'rx': 157, 'tx': 0}, '1': {'rx': 323, 'tx': 0}, '6': {'rx': 327, 'tx': 0}, '4': {'rx': 445, 'tx': 0}, '2': {'rx': 1319, 'tx': 0}, '5': {'rx': 392, 'tx': 0}, '3': {'rx': 268, 'tx': 0}}
+[2025-12-01 00:40:25.077] [STATS] === PORT STATISTICS: AFTER LINK FAILURE (10s) ===
+[2025-12-01 00:40:25.088] [STATS] s1:
+[2025-12-01 00:40:25.088] [STATS]   port LOCAL: rx pkts=98, bytes=5065, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.088] [STATS]   port  4: rx pkts=268, bytes=23377, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.088] [STATS]   port  1: rx pkts=2869, bytes=245022, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.088] [STATS]   port  2: rx pkts=38, bytes=3096, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.089] [STATS]   port  3: rx pkts=3000, bytes=2666312, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.106] [STATS] s2:
+[2025-12-01 00:40:25.106] [STATS]   port LOCAL: rx pkts=157, bytes=8133, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.106] [STATS]   port  1: rx pkts=323, bytes=43739, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.106] [STATS]   port  6: rx pkts=328, bytes=299906, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.106] [STATS]   port  4: rx pkts=445, bytes=329794, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.106] [STATS]   port  2: rx pkts=1320, bytes=121596, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.106] [STATS]   port  5: rx pkts=392, bytes=318776, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.106] [STATS]   port  3: rx pkts=268, bytes=23377, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.118] [STATS] s3:
+[2025-12-01 00:40:25.118] [STATS]   port LOCAL: rx pkts=244, bytes=12626, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.118] [STATS]   port  4: rx pkts=329, bytes=299153, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.119] [STATS]   port  6: rx pkts=321, bytes=273261, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.119] [STATS]   port  1: rx pkts=2872, bytes=245087, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.119] [STATS]   port  2: rx pkts=1152, bytes=947610, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.119] [STATS]   port  5: rx pkts=301, bytes=286610, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.119] [STATS]   port  3: rx pkts=971, bytes=892400, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.128] [STATS] s4:
+[2025-12-01 00:40:25.128] [STATS]   port LOCAL: rx pkts=246, bytes=12730, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.128] [STATS]   port  4: rx pkts=263, bytes=266961, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.128] [STATS]   port  1: rx pkts=12, bytes=900, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.128] [STATS]   port  6: rx pkts=316, bytes=285019, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.129] [STATS]   port  2: rx pkts=1167, bytes=109901, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.129] [STATS]   port  5: rx pkts=423, bytes=344301, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.129] [STATS]   port  3: rx pkts=38, bytes=3096, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:40:25.129] [ROUTE] === ROUTE CHANGE ANALYSIS ===
+[2025-12-01 00:40:25.129] [ROUTE] Before: s2 port stats = {'OFPST_PORT reply (OF1.3) (xid=0x2)': {'rx': 133, 'tx': 0}, '1': {'rx': 320, 'tx': 0}, '6': {'rx': 243, 'tx': 0}, '4': {'rx': 356, 'tx': 0}, '2': {'rx': 1051, 'tx': 0}, '5': {'rx': 304, 'tx': 0}, '3': {'rx': 260, 'tx': 0}}
+[2025-12-01 00:40:25.129] [ROUTE] After:  s2 port stats = {'OFPST_PORT reply (OF1.3) (xid=0x2)': {'rx': 157, 'tx': 0}, '1': {'rx': 323, 'tx': 0}, '6': {'rx': 327, 'tx': 0}, '4': {'rx': 445, 'tx': 0}, '2': {'rx': 1319, 'tx': 0}, '5': {'rx': 392, 'tx': 0}, '3': {'rx': 268, 'tx': 0}}
+[2025-12-01 00:40:25.129] [ROUTE] If traffic moved from eth1 to eth2/eth3, redundancy is working!
+[2025-12-01 00:41:45.130] [PHASE] Capturing final statistics...
+[2025-12-01 00:41:45.130] [ROUTE] === ROUTE ANALYSIS: END OF EXPERIMENT ===
+[2025-12-01 00:41:45.154] [ROUTE] Switch s2 port mapping:
+[2025-12-01 00:41:45.154] [ROUTE]   s2-eth1 = s2 ↔ s1 (Core) - PRIMARY
+[2025-12-01 00:41:45.154] [ROUTE]   s2-eth2 = s2 ↔ s3 (Ring) - BACKUP
+[2025-12-01 00:41:45.154] [ROUTE]   s2-eth3 = s2 ↔ s4 (Ring) - BACKUP
+[2025-12-01 00:41:45.155] [ROUTE] Port statistics: {'OFPST_PORT reply (OF1.3) (xid=0x2)': {'rx': 277, 'tx': 0}, '1': {'rx': 323, 'tx': 0}, '6': {'rx': 750, 'tx': 0}, '4': {'rx': 887, 'tx': 0}, '2': {'rx': 2684, 'tx': 0}, '5': {'rx': 836, 'tx': 0}, '3': {'rx': 341, 'tx': 0}}
+[2025-12-01 00:41:45.155] [STATS] === PORT STATISTICS: END OF EXPERIMENT ===
+[2025-12-01 00:41:45.168] [STATS] s1:
+[2025-12-01 00:41:45.169] [STATS]   port LOCAL: rx pkts=138, bytes=7145, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.169] [STATS]   port  4: rx pkts=341, bytes=27767, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.169] [STATS]   port  1: rx pkts=7234, bytes=633692, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.169] [STATS]   port  2: rx pkts=38, bytes=3096, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.169] [STATS]   port  3: rx pkts=7488, bytes=7424662, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.178] [STATS] s2:
+[2025-12-01 00:41:45.178] [STATS]   port LOCAL: rx pkts=277, bytes=14373, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.178] [STATS]   port  1: rx pkts=323, bytes=43739, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.178] [STATS]   port  6: rx pkts=750, bytes=797500, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.179] [STATS]   port  4: rx pkts=887, bytes=827247, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.179] [STATS]   port  2: rx pkts=2684, bytes=242908, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.179] [STATS]   port  5: rx pkts=836, bytes=817869, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.179] [STATS]   port  3: rx pkts=341, bytes=27767, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.192] [STATS] s3:
+[2025-12-01 00:41:45.192] [STATS]   port LOCAL: rx pkts=444, bytes=23026, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.192] [STATS]   port  4: rx pkts=751, bytes=796410, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.192] [STATS]   port  6: rx pkts=826, bytes=775401, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.192] [STATS]   port  1: rx pkts=7238, bytes=633815, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.192] [STATS]   port  2: rx pkts=2462, bytes=2442952, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.192] [STATS]   port  5: rx pkts=743, bytes=784710, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.192] [STATS]   port  3: rx pkts=2777, bytes=2656148, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.204] [STATS] s4:
+[2025-12-01 00:41:45.204] [STATS]   port LOCAL: rx pkts=446, bytes=23130, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.205] [STATS]   port  4: rx pkts=706, bytes=766540, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.205] [STATS]   port  1: rx pkts=13, bytes=970, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.205] [STATS]   port  6: rx pkts=902, bytes=870548, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.205] [STATS]   port  2: rx pkts=2971, bytes=265555, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.205] [STATS]   port  5: rx pkts=1196, bytes=1021217, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.206] [STATS]   port  3: rx pkts=39, bytes=3166, drop=0, errs=0, frame=0, over=0, crc=0
+[2025-12-01 00:41:45.206] [PHASE] === EXPERIMENT COMPLETE ===

@@ -1,0 +1,38 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+ANOMALY:
+  Messages Received : 3448
+  Avg Delay         : 51.92 ms
+  Min Delay         : 1.12 ms
+  Max Delay         : 66.02 ms
+  Std Dev Delay     : 15.47 ms
+  Avg Jitter        : 3.56 ms
+  Max Seq Number    : 438
+
+  PACKET LOSS:
+    Expected        : 439 messages
+    Received        : 439 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Messages Received : 3393
+  Avg Delay         : 52.68 ms
+  Min Delay         : 1.06 ms
+  Max Delay         : 65.32 ms
+  Std Dev Delay     : 14.41 ms
+  Avg Jitter        : 3.41 ms
+  Max Seq Number    : 419
+
+  PACKET LOSS:
+    Expected        : 420 messages
+    Received        : 420 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+TOTAL:
+  Duration          : 35.92 s
+  Total Messages    : 6841
+  Throughput        : 190.47 msg/s

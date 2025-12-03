@@ -1,0 +1,49 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 07-dscp-qos-13switches-core-bottleneck
+  Topology          : DSCP Hierarchical 3-Tier - Core Bottleneck (13 switches, 19 hosts)
+  Switches          : 13
+  Publishers        : 18
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps (500 Kbps)
+  QoS Queues        : True
+
+======================================================================
+
+ANOMALY:
+  Messages Received : 8890
+  Avg Delay         : 5082.72 ms
+  Min Delay         : 0.38 ms
+  Max Delay         : 13007.64 ms
+  Std Dev Delay     : 3839.78 ms
+  Avg Jitter        : 206.45 ms
+  Max Seq Number    : 1122
+
+  PACKET LOSS:
+    Expected        : 1123 messages
+    Received        : 1123 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Messages Received : 1672
+  Avg Delay         : 12769.89 ms
+  Min Delay         : 0.54 ms
+  Max Delay         : 29710.09 ms
+  Std Dev Delay     : 8475.02 ms
+  Avg Jitter        : 310.09 ms
+  Max Seq Number    : 242
+
+  PACKET LOSS:
+    Expected        : 243 messages
+    Received        : 243 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+TOTAL:
+  Duration          : 8.40 s
+  Total Messages    : 10562
+  Throughput        : 1256.81 msg/s

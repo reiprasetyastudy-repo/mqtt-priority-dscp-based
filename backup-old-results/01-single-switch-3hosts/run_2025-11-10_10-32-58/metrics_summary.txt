@@ -1,0 +1,18 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : Unknown
+  Topology          : Unknown
+  Switches          : Unknown
+  Publishers        : Unknown
+  Bandwidth Limit   : Unknown
+  QoS Queues        : Unknown
+
+======================================================================
+
+TOTAL:
+  Duration          : 0.00 s
+  Total Messages    : 0
+  Throughput        : 0.00 msg/s

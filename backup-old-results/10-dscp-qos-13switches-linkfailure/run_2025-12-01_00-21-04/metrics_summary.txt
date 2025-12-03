@@ -1,0 +1,119 @@
+
+======================================================================
+  LINK FAILURE TEST - SIMULATION SUMMARY
+  Scenario 10: DSCP QoS with Ring Topology + Link Failure
+======================================================================
+
+CONFIGURATION:
+  Phase 1 : Normal operation (all links active)
+  Phase 2 : Link s2-eth1 DOWN (traffic via ring)
+
+======================================================================
+  PHASE 1: NORMAL OPERATION
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 7474
+  Avg Delay         : 4076.58 ms
+  Min Delay         : 0.43 ms
+  Max Delay         : 9940.29 ms
+  Std Dev Delay     : 3061.90 ms
+  Avg Jitter        : 78.99 ms
+
+  PACKET LOSS:
+    Expected        : 7474 messages
+    Received        : 7474 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 1397
+  Avg Delay         : 10398.44 ms
+  Min Delay         : 0.43 ms
+  Max Delay         : 24839.67 ms
+  Std Dev Delay     : 7062.85 ms
+  Avg Jitter        : 252.54 ms
+
+  PACKET LOSS:
+    Expected        : 1397 messages
+    Received        : 1397 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+PHASE TOTAL: 8871 messages
+
+======================================================================
+  PHASE 2: LINK DOWN (s2-eth1 disabled)
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 10788
+  Avg Delay         : 66316.50 ms
+  Min Delay         : 6600.14 ms
+  Max Delay         : 84560.98 ms
+  Std Dev Delay     : 21287.95 ms
+  Avg Jitter        : 119.01 ms
+
+  PACKET LOSS:
+    Expected        : 18262 messages
+    Received        : 10788 messages
+    Lost            : 7474 messages
+    Loss Rate       : 40.93%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 2677
+  Avg Delay         : 86245.41 ms
+  Min Delay         : 20634.20 ms
+  Max Delay         : 118467.02 ms
+  Std Dev Delay     : 23123.11 ms
+  Avg Jitter        : 421.69 ms
+
+  PACKET LOSS:
+    Expected        : 4074 messages
+    Received        : 2677 messages
+    Lost            : 1397 messages
+    Loss Rate       : 34.29%
+
+PHASE TOTAL: 13465 messages
+
+======================================================================
+  PHASE COMPARISON
+======================================================================
+
+ANOMALY:
+  Phase 1 Avg Delay : 4076.58 ms
+  Phase 2 Avg Delay : 66316.50 ms
+  Delay Change      : +62239.92 ms (+1526.8%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 40.93%
+
+NORMAL:
+  Phase 1 Avg Delay : 10398.44 ms
+  Phase 2 Avg Delay : 86245.41 ms
+  Delay Change      : +75846.96 ms (+729.4%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 34.29%
+
+======================================================================
+  REDUNDANCY VERDICT
+======================================================================
+
+  Phase 2 Messages  : 13465
+  
+  ✓ REDUNDANCY WORKS!
+    Traffic successfully rerouted via ring after link failure.
+    Link s2↔s1 down, but Floor 1 traffic reached broker via s2→s3→s1 or s2→s4→s1.
+
+======================================================================
+  GRAND TOTAL
+======================================================================
+  Phase 1 Messages  : 8871
+  Phase 2 Messages  : 13465
+  Total Messages    : 22336
+======================================================================

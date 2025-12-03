@@ -1,0 +1,49 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 05-dscp-qos
+  Topology          : DSCP-Based Hierarchical (7 switches, 8 publishers)
+  Switches          : 7
+  Publishers        : 8
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps (500 Kbps)
+  QoS Queues        : True
+
+======================================================================
+
+ANOMALY:
+  Messages Received : 5912
+  Avg Delay         : 0.91 ms
+  Min Delay         : 0.29 ms
+  Max Delay         : 11.34 ms
+  Std Dev Delay     : 0.39 ms
+  Avg Jitter        : 0.25 ms
+  Max Seq Number    : 1514
+
+  PACKET LOSS:
+    Expected        : 1515 messages
+    Received        : 1515 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Messages Received : 1884
+  Avg Delay         : 9917.21 ms
+  Min Delay         : 0.61 ms
+  Max Delay         : 21201.46 ms
+  Std Dev Delay     : 5962.61 ms
+  Avg Jitter        : 102.37 ms
+  Max Seq Number    : 617
+
+  PACKET LOSS:
+    Expected        : 618 messages
+    Received        : 618 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+TOTAL:
+  Duration          : 10.26 s
+  Total Messages    : 7796
+  Throughput        : 759.99 msg/s

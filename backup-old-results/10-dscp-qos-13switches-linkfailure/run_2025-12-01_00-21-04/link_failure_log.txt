@@ -1,0 +1,30 @@
+======================================================================
+LINK FAILURE TEST LOG - Scenario 10
+======================================================================
+
+Link disabled: s2-eth1
+Phase 1 duration: 30 seconds
+
+======================================================================
+EVENTS:
+======================================================================
+
+[2025-12-01 00:24:18.317] [PHASE] === PHASE 1: Normal Operation (30s) ===
+[2025-12-01 00:24:18.318] [PHASE] All links active. Traffic uses direct path to core.
+[2025-12-01 00:24:48.318] [PHASE] === LINK FAILURE EVENT ===
+[2025-12-01 00:24:48.319] [LINK_FAILURE] Disabling link s2-eth1...
+[2025-12-01 00:24:48.319] [VERIFY] Link status BEFORE disable:
+[2025-12-01 00:24:48.347] [VERIFY]   ip link show: UP
+[2025-12-01 00:24:48.347] [VERIFY]   operstate: up
+[2025-12-01 00:24:48.347] [VERIFY]   ovs-vsctl: checked
+[2025-12-01 00:24:48.355] [LINK_FAILURE] Link s2-eth1 disabled successfully
+[2025-12-01 00:24:49.355] [VERIFY] Link status AFTER disable:
+[2025-12-01 00:24:49.377] [VERIFY]   ip link show: DOWN
+[2025-12-01 00:24:49.377] [VERIFY]   operstate: down
+[2025-12-01 00:24:49.377] [VERIFY]   ovs-vsctl: checked
+[2025-12-01 00:24:49.377] [VERIFY] Checking OVS flow rules on s2:
+[2025-12-01 00:24:49.408] [VERIFY]   Flow count: 8 rules
+[2025-12-01 00:24:49.408] [PHASE] === PHASE 2: Redundancy Test (90s) ===
+[2025-12-01 00:24:49.408] [PHASE] Link s2↔s1 is DOWN. Floor 1 traffic must use ring.
+[2025-12-01 00:24:49.408] [PHASE] Expected path: s2 → s3 → s1 or s2 → s4 → s1
+[2025-12-01 00:26:19.408] [PHASE] === EXPERIMENT COMPLETE ===

@@ -44,98 +44,252 @@ Framework QoS yang memprioritaskan data MQTT **anomaly/kritis** (alarm kebakaran
 
 ## 3. SKENARIO EKSPERIMEN
 
-| Skenario | Deskripsi | Topologi |
-|----------|-----------|----------|
-| 06 | High congestion (0.5 Mbps) | 13 switches, 18 publishers |
-| 07 | Core bottleneck | 13 switches, core 0.5 Mbps |
-| 08 | Lossy network (packet loss) | 13 switches, 5% loss |
-| **09** | **Ring topology + redundancy** | 13 switches, ring at aggregation |
-| **10** | **Link failure test** | Same as 09, link s2-s1 disabled |
+| # | Nama | Deskripsi | Topologi |
+|---|------|-----------|----------|
+| 01 | Baseline | Normal operation | 13 switches hierarchical |
+| 02 | Lossy | Packet loss (10% core, 5% edge) | 13 switches |
+| 03 | Dual-Core | 2 core switches for redundancy | 14 switches |
+| 04 | Core Failure | Core 1 fails at 150s | 14 switches |
+| 05 | Dual-Redundant | Full redundancy at all layers | 17 switches |
+| 06 | Dist Failure | Distribution layer failure | 17 switches |
 
-### Skenario 09 & 10: Ring Topology
+### Parameter Standard (Semua Skenario)
+```python
+LINK_BANDWIDTH_MBPS = 0.2    # 200 Kbps (creates ~1.8x congestion)
+MSG_RATE = 10                # 10 msg/s per publisher (realistic IoT)
+DURATION = 300               # 5 minutes send phase
+DRAIN_RATIO = 1.0            # Drain time = Duration × 1.0
+```
+
+### Hasil yang Diharapkan
+```
+ANOMALY (DSCP 46, High Priority):
+  - Packet Loss: 0%
+  - Avg Delay: ~200ms
+
+NORMAL (DSCP 0, Best Effort):
+  - Packet Loss: ~76%
+  - Avg Delay: ~27,000ms (27 detik)
+```
+
+### Topologi
+
+#### Skenario 01-02: 13 Switch Hierarchical
 ```
                     ┌──────┐
-                    │  s1  │ CORE (Broker)
+                    │  s1  │ CORE (Broker here)
                     └───┬──┘
+                        │
           ┌─────────────┼─────────────┐
-      ┌───▼───┐     ┌───▼───┐     ┌───▼───┐
-      │  s2   │←───→│  s3   │←───→│  s4   │  AGGREGATION (RING)
-      │Floor 1│     │Floor 2│     │Floor 3│
-      └───┬───┘←─────────────────→└───┬───┘
           │             │             │
-       s5-s7         s8-s10       s11-s13    EDGE (9 switches)
+      ┌───▼───┐     ┌───▼───┐     ┌───▼───┐
+      │  s2   │     │  s3   │     │  s4   │  AGGREGATION
+      │Floor 1│     │Floor 2│     │Floor 3│
+      └───┬───┘     └───┬───┘     └───┬───┘
+          │             │             │
+      ┌───┼───┐     ┌───┼───┐     ┌───┼───┐
+     s5  s6  s7    s8  s9 s10   s11 s12 s13  EDGE
+```
+
+#### Skenario 03-04: 14 Switch Dual-Core
+```
+                    MQTT Broker
+                         │
+                  ┌──────┴──────┐
+              ┌───┴───┐     ┌───┴───┐
+              │  s1   │     │  s2   │  CORE (2 switches)
+              └───┬───┘     └───┬───┘
+                  │╲           ╱│
+                  │ ╲─────────╱ │
+          ┌───────┼─────╳──────┼───────┐
+          s3     s4           s5    DISTRIBUTION
+        Floor 1  Floor 2    Floor 3
+```
+
+#### Skenario 05-06: 17 Switch Dual-Redundant
+```
+                        MQTT Broker
+                             │
+                      ┌──────┴──────┐
+                   Core 1        Core 2
+                   (s1)          (s2)
+                      │╲    ╳    ╱│
+                ┌─────┼──╳───╳──┼─────┐
+              ┌─┴─┐ ┌─┴─┐ ┌─┴─┐ ┌─┴─┐ ┌─┴─┐ ┌─┴─┐
+              │s3 │ │s4 │ │s5 │ │s6 │ │s7 │ │s8 │  DISTRIBUTION (2/floor)
+              └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘
+                ╲  ╳  ╱     ╲  ╳  ╱     ╲  ╳  ╱
+               s9 s10 s11  s12 s13 s14  s15 s16 s17  EDGE (3/floor)
 ```
 
 ---
 
-## 4. PERBAIKAN TERBARU (2025-12-01)
+## 4. STRUKTUR PROYEK
 
-### A. Drain Time
-- **Problem**: Message in-flight dihitung sebagai packet loss
-- **Solution**: Tunggu `duration` seconds setelah publishers stop
-- **Total time**: 2 × duration (send + drain)
-
-### B. Per-Sensor Metrics
-- Packet loss per sensor dengan range calculation: `max_seq - min_seq + 1`
-- Per-floor summary dengan delay dan loss rate
-
-### C. Experiment Logging
-- Semua output disimpan ke `logs/experiment.log`
-- Per-experiment folder: `results/scenario/run_YYYY-MM-DD_HH-MM-SS/logs/`
-
-### D. Bug Fix: Packet Loss Calculation
-- **Before**: `expected = max_seq + 1` (salah untuk per-phase)
-- **After**: `expected = max_seq - min_seq + 1` (benar untuk range)
+```
+/home/mqtt-sdn/
+├── scenarios/
+│   ├── 01-baseline-13switches/
+│   │   ├── topology.py              # Main topology + experiment
+│   │   ├── run_experiment.sh        # Runner script
+│   │   ├── publisher_dscp0_besteffort.py
+│   │   └── publisher_dscp46_veryhigh.py
+│   ├── 02-lossy-13switches/
+│   ├── 03-dualcore-14switches/
+│   ├── 04-corefailure-14switches/
+│   ├── 05-dualredundant-17switches/
+│   └── 06-distfailure-17switches/
+│
+├── shared/
+│   ├── config/
+│   │   ├── defaults.py              # Default parameters
+│   │   └── naming.py                # Sensor naming functions
+│   ├── mqtt/
+│   │   ├── dscp_config.py           # DSCP values
+│   │   ├── publisher_dscp.py        # Generic publisher (flush=True)
+│   │   └── subscriber_enhanced.py   # Enhanced subscriber
+│   ├── sdn/
+│   │   └── controller.py            # DSCP-based QoS controller
+│   ├── topology/
+│   │   ├── base.py                  # Base topology class
+│   │   └── qos.py                   # QoS queue config
+│   └── analysis/
+│       ├── metrics.py               # Metrics calculation
+│       ├── packet_loss.py           # Packet loss from publisher logs
+│       └── export.py                # Export to TXT/CSV
+│
+├── results/                         # Experiment results
+│   └── {scenario}/run_{timestamp}/
+│       ├── mqtt_metrics_log.csv     # Raw data from subscriber
+│       ├── metrics_summary.txt      # Summary report
+│       ├── metrics_summary.csv      # Excel-compatible
+│       └── logs/                    # Publisher logs
+│
+├── backup-old-results/              # Old results backup
+├── analytics/                       # Jupyter notebooks
+├── docs/                            # Documentation
+│
+├── generate_summary.py              # Main summary generator
+├── CONTEXT.md                       # This file
+└── README.md                        # Quick start
+```
 
 ---
 
 ## 5. CARA MENJALANKAN
 
+### Quick Test (1 menit)
 ```bash
-# Skenario 09 (Ring topology)
-cd /home/mqtt-sdn/scenarios/09-dscp-qos-13switches-ring
-sudo ./run_experiment.sh 60  # 60s send + 60s drain = 120s total
+cd /home/mqtt-sdn/scenarios/01-baseline-13switches
+sudo ./run_experiment.sh 60
+```
 
-# Skenario 10 (Link failure)
-cd /home/mqtt-sdn/scenarios/10-dscp-qos-13switches-linkfailure
-sudo ./run_experiment.sh 120  # Phase 1: 30s, Phase 2: 90s, Drain: 120s
+### Full Experiment (5 menit send + 5 menit drain)
+```bash
+cd /home/mqtt-sdn/scenarios/01-baseline-13switches
+sudo ./run_experiment.sh 300
+```
 
-# Generate summary
-cd /home/mqtt-sdn
-python3 generate_summary_manual_v2.py results/09-*/run_*/mqtt_metrics_log.csv
-python3 generate_summary_linkfailure.py results/10-*/run_*/mqtt_metrics_log.csv
+### Generate Summary
+```bash
+python3 /home/mqtt-sdn/generate_summary.py results/01-*/run_*/mqtt_metrics_log.csv
+```
+
+### Cleanup
+```bash
+sudo mn -c
+sudo pkill -f ryu-manager
+sudo pkill -f mosquitto
 ```
 
 ---
 
-## 6. STRUKTUR FILE
+## 6. TIMING & DRAIN PHASE
 
 ```
-/home/mqtt-sdn/
-├── scenarios/
-│   ├── 06-dscp-qos-13switches/          # High congestion
-│   ├── 07-dscp-qos-13switches-core-bottleneck/
-│   ├── 08-dscp-qos-13switches-lossy/
-│   ├── 09-dscp-qos-13switches-ring/     # Ring + redundancy
-│   └── 10-dscp-qos-13switches-linkfailure/  # Link failure test
-├── results/                             # Per-experiment results
-├── shared/mqtt/                         # Publisher & subscriber scripts
-├── generate_summary_manual_v2.py        # Summary for normal scenarios
-├── generate_summary_linkfailure.py      # Summary for link failure
-├── CONTEXT.md                           # This file
-├── CLAUDE.md                            # Technical guidance
-└── README.md                            # Quick start
+EXPERIMENT TIMING:
+├── Send Phase    : DURATION seconds (publishers active)
+├── Drain Phase   : DURATION × DRAIN_RATIO seconds
+│                   (publishers stopped, subscriber still receiving)
+└── Total Time    : DURATION × (1 + DRAIN_RATIO)
+
+Example with DURATION=300, DRAIN_RATIO=1.0:
+├── Send Phase    : 300 seconds (0:00 - 5:00)
+├── Drain Phase   : 300 seconds (5:00 - 10:00)
+└── Total Time    : 600 seconds (10 minutes)
+```
+
+### Drain Phase Verification
+```
+*** [PHASE 2] Drain phase ended
+    Messages during drain: 102    ← Harus > 0 jika drain berfungsi
+
+  ✓ DRAIN OK: 102 messages received after publishers stopped
 ```
 
 ---
 
-## 7. ENVIRONMENT
+## 7. METRICS CALCULATION
+
+### Packet Loss
+```python
+# Sent count: MAX of publisher log and CSV seq range
+# (handles truncated logs due to process kill)
+seq_range = max_seq - min_seq + 1
+sent = max(log_count, seq_range)
+received = len(unique_sequences)
+loss = sent - received
+loss_rate = (lost / sent) * 100
+```
+
+### Jitter
+```python
+# Calculated per-device, then aggregated
+# (not across devices - that would be meaningless)
+jitter = mean(abs(delay[i] - delay[i-1]) for consecutive messages)
+```
+
+---
+
+## 8. ENVIRONMENT
 
 - OS: Ubuntu Linux
 - Python: 3.12.3
-- Virtual env Ryu: `/home/aldi/ryu39`
+- Virtual env Ryu: `/home/aldi/ryu39` (Python 3.9)
 - Dependencies: Mininet, Open vSwitch, Mosquitto, paho-mqtt
 
 ---
 
-**Last Updated**: 2025-12-01
+## 9. CHANGELOG
+
+### 2025-12-03: Major Refactoring
+
+**A. Restructure Skenario**
+- Hapus skenario lama (01-05, 07)
+- Rename: 06→01, 08→02, 09→03, 10→04, 11→05, 12→06
+
+**B. Modular Architecture**
+- `shared/` modules untuk DRY principle
+- `BaseTopology` class untuk common functionality
+- Single `controller.py` untuk semua skenario
+
+**C. Parameter Update**
+- Bandwidth: 0.2 Mbps (realistic congestion ~1.8x)
+- Msg Rate: 10 msg/s (same for all, fair comparison)
+- Drain Time: 1:1 ratio
+
+**D. Bug Fixes**
+- Publisher log truncation: Added `flush=True`
+- Packet loss calculation: Use `max(log_count, seq_range)`
+- Jitter calculation: Per-device, then aggregate
+
+**E. Verified Results**
+```
+Anomaly: 0% loss, 206ms delay
+Normal: 76% loss, 27,000ms delay
+QoS working correctly!
+```
+
+---
+
+**Last Updated**: 2025-12-03

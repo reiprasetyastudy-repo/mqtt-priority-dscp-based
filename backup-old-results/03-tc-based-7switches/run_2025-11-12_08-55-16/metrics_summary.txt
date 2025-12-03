@@ -1,0 +1,52 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+ANOMALY:
+  Messages Received : 30237
+  Avg Delay         : 26.79 ms
+  Min Delay         : 1.00 ms
+  Max Delay         : 65.50 ms
+  Std Dev Delay     : 2.20 ms
+  Avg Jitter        : 1.74 ms
+  Max Seq Number    : 7591
+
+  PACKET LOSS:
+    Expected        : 7592 messages
+    Received        : 7592 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Messages Received : 30156
+  Avg Delay         : 26.98 ms
+  Min Delay         : 1.47 ms
+  Max Delay         : 66.09 ms
+  Std Dev Delay     : 1.91 ms
+  Avg Jitter        : 1.86 ms
+  Max Seq Number    : 7569
+
+  PACKET LOSS:
+    Expected        : 7570 messages
+    Received        : 7570 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+TOTAL:
+  Duration          : 301.93 s
+  Total Messages    : 60393
+  Throughput        : 200.02 msg/s
+======================================================================
+
+ANALYSIS:
+======================================================================
+Anomaly Avg Delay : 26.79 ms
+Normal Avg Delay  : 26.98 ms
+Difference        : 0.19 ms (0.7%)
+
+❌ NO PRIORITY EFFECT. Results are same (±5%).
+   Possible issues:
+   1. Controller not using controller_v2.py
+   2. Queues not properly attached
+   3. Insufficient congestion
+======================================================================

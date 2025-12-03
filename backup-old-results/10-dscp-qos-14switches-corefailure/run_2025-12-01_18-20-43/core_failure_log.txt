@@ -1,0 +1,7 @@
+Core Failure Event
+==================
+Timestamp: 2025-12-01T18:22:10.890590
+Failed Switch: s2 (Core 2)
+Disabled Ports: s2-eth1, s2-eth2, s2-eth3, s2-eth4
+
+Traffic should now route through s1 (Core 1) only.

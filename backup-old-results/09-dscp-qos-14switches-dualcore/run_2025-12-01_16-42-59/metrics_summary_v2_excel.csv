@@ -1,0 +1,41 @@
+MQTT-SDN METRICS SUMMARY
+
+ANOMALY TRAFFIC
+Metric,Value,Unit
+Devices,9,
+Messages Received,159721,messages
+Avg Delay,118441.09,ms
+Min Delay,0.54,ms
+Max Delay,247887.85,ms
+Std Dev Delay,70459.54,ms
+Avg Jitter,47.21,ms
+
+PACKET LOSS
+Expected,159721,messages
+Received,159721,messages
+Lost,0,messages
+Loss Rate,0.00,%
+Avg Loss/Device,0.00,%
+
+NORMAL TRAFFIC
+Metric,Value,Unit
+Devices,9,
+Messages Received,29318,messages
+Avg Delay,267303.73,ms
+Min Delay,0.79,ms
+Max Delay,546010.39,ms
+Std Dev Delay,154823.12,ms
+Avg Jitter,197.36,ms
+
+PACKET LOSS
+Expected,29318,messages
+Received,29318,messages
+Lost,0,messages
+Loss Rate,0.00,%
+Avg Loss/Device,0.00,%
+
+TOTAL
+Metric,Value,Unit
+Duration,59.68,s
+Total Messages,189039,messages
+Throughput,3167.38,msg/s

@@ -197,14 +197,14 @@ class DSCPPublisher:
                 # Publish to MQTT
                 result = self.client.publish(self.topic, json.dumps(payload), qos=1)
 
-                # Print status
+                # Print status (flush=True to prevent log truncation when killed)
                 label = self.traffic_config['label']
                 if result.rc == mqtt.MQTT_ERR_SUCCESS:
                     print(f"[{label}/DSCP{self.dscp_value}] "
                           f"seq={self.sequence_number:05d} "
-                          f"value={payload['value']:6.2f} ✓")
+                          f"value={payload['value']:6.2f} ✓", flush=True)
                 else:
-                    print(f"[ERROR] seq={self.sequence_number:05d} failed")
+                    print(f"[ERROR] seq={self.sequence_number:05d} failed", flush=True)
 
                 self.sequence_number += 1
                 time.sleep(1.0 / self.msg_rate)

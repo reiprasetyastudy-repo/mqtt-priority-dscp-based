@@ -1,0 +1,51 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 09-dscp-qos-13switches-ring
+  Topology          : DSCP Ring (13 switches, 15 links, 19 hosts)
+  Switches          : 13
+  Publishers        : 18
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps (500 Kbps)
+  QoS Queues        : True
+
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 32813
+  Avg Delay         : 22614.28 ms
+  Min Delay         : 0.37 ms
+  Max Delay         : 52515.36 ms
+  Std Dev Delay     : 15009.52 ms
+  Avg Jitter        : 1005.70 ms
+
+  PACKET LOSS:
+    Expected        : 32813 messages
+    Received        : 32813 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 6038
+  Avg Delay         : 53051.66 ms
+  Min Delay         : 0.33 ms
+  Max Delay         : 109694.06 ms
+  Std Dev Delay     : 31844.39 ms
+  Avg Jitter        : 315.85 ms
+
+  PACKET LOSS:
+    Expected        : 6038 messages
+    Received        : 6038 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+TOTAL:
+  Duration          : 17.40 s
+  Total Messages    : 38851
+  Throughput        : 2232.52 msg/s

@@ -1,0 +1,40 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 156892
+  Avg Delay         : 122329.01 ms
+  Min Delay         : 0.68 ms
+  Max Delay         : 253343.12 ms
+  Std Dev Delay     : 71923.55 ms
+  Avg Jitter        : 375.43 ms
+
+  PACKET LOSS:
+    Expected        : 156892 messages
+    Received        : 156892 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 29441
+  Avg Delay         : 266502.74 ms
+  Min Delay         : 0.72 ms
+  Max Delay         : 538426.44 ms
+  Std Dev Delay     : 155255.21 ms
+  Avg Jitter        : 299.14 ms
+
+  PACKET LOSS:
+    Expected        : 29441 messages
+    Received        : 29441 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+TOTAL:
+  Duration          : 69.07 s
+  Total Messages    : 186333
+  Throughput        : 2697.71 msg/s

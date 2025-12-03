@@ -1,0 +1,73 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 159197
+  Avg Delay         : 118411.63 ms
+  Min Delay         : 0.38 ms
+  Max Delay         : 263742.81 ms
+  Std Dev Delay     : 71501.48 ms
+  Avg Jitter        : 47.19 ms
+
+  PACKET LOSS:
+    Expected        : 159197 messages
+    Received        : 159197 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 29472
+  Avg Delay         : 267166.57 ms
+  Min Delay         : 0.81 ms
+  Max Delay         : 546039.94 ms
+  Std Dev Delay     : 154743.54 ms
+  Avg Jitter        : 196.00 ms
+
+  PACKET LOSS:
+    Expected        : 29472 messages
+    Received        : 29472 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+TOTAL:
+  Duration          : 70.60 s
+  Total Messages    : 188669
+  Throughput        : 2672.37 msg/s
+
+==========================================================================================
+PER-SENSOR METRICS (sorted by avg delay, highest first)
+==========================================================================================
+
+Sensor                     Floor Type       Recv Expect    Loss    Avg Delay
+-------------------------- ----- -------- ------ ------ ------- ------------
+sensor_f2r3_normal             2 normal     2701   2701    0.0%  271072.06ms
+sensor_f3r1_normal             3 normal     3329   3329    0.0%  267417.90ms
+sensor_f3r2_normal             3 normal     3340   3340    0.0%  267332.95ms
+sensor_f1r3_normal             1 normal     3357   3357    0.0%  267106.24ms
+sensor_f2r2_normal             2 normal     3342   3342    0.0%  266984.75ms
+sensor_f2r1_normal             2 normal     3349   3349    0.0%  266890.57ms
+sensor_f3r3_normal             3 normal     3320   3320    0.0%  266585.02ms
+sensor_f1r1_normal             1 normal     3362   3362    0.0%  265980.11ms
+sensor_f1r2_normal             1 normal     3372   3372    0.0%  265895.24ms
+sensor_f3r1_anomaly            3 anomaly   16563  16563    0.0%  131279.45ms
+sensor_f2r2_anomaly            2 anomaly   16590  16590    0.0%  130947.99ms
+sensor_f2r1_anomaly            2 anomaly   16619  16619    0.0%  130827.60ms
+sensor_f1r2_anomaly            1 anomaly   16639  16639    0.0%  130700.56ms
+sensor_f1r3_anomaly            1 anomaly   16619  16619    0.0%  130686.46ms
+sensor_f2r3_anomaly            2 anomaly   16622  16622    0.0%  129604.29ms
+sensor_f1r1_anomaly            1 anomaly   19911  19911    0.0%   98491.19ms
+sensor_f3r2_anomaly            3 anomaly   19840  19840    0.0%   97600.49ms
+sensor_f3r3_anomaly            3 anomaly   19794  19794    0.0%   97575.27ms
+
+PER-FLOOR SUMMARY:
+----------------------------------------------------------------------
+Floor   Messages   Lost    Anomaly Avg     Normal Avg    Loss%
+----- ---------- ------ -------------- -------------- --------
+    1      63260      0    119959.40ms    266327.20ms    0.00%
+    2      59223      0    130459.96ms    268315.80ms    0.00%
+    3      66186      0    108818.40ms    267111.96ms    0.00%

@@ -1,0 +1,132 @@
+
+======================================================================
+  LINK FAILURE TEST - SIMULATION SUMMARY
+  Scenario 10: DSCP QoS with Ring Topology + Core Failure
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 10-dscp-qos-14switches-corefailure
+  Topology          : DSCP Dual Core + Core Failure Test
+  Switches          : 14
+  Publishers        : 18
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps
+  QoS Queues        : True
+  Phase 1 Duration  : 30 seconds
+
+TEST PHASES:
+  Phase 1 (0-30s)  : Normal operation - all links active
+  Phase 2 (30s+)   : Link Core 2 (s2) DOWN - traffic via ring
+
+======================================================================
+  PHASE 1: NORMAL OPERATION (0-30s)
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 7756
+  Avg Delay         : 4960.78 ms
+  Min Delay         : 0.40 ms
+  Max Delay         : 11577.57 ms
+  Std Dev Delay     : 3350.07 ms
+  Avg Jitter        : 140.09 ms
+
+  PACKET LOSS:
+    Expected        : 7756 messages
+    Received        : 7756 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 1373
+  Avg Delay         : 12469.72 ms
+  Min Delay         : 0.53 ms
+  Max Delay         : 26083.77 ms
+  Std Dev Delay     : 7366.41 ms
+  Avg Jitter        : 198.65 ms
+
+  PACKET LOSS:
+    Expected        : 1373 messages
+    Received        : 1373 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+PHASE TOTAL:
+  Duration          : 18.45 s
+  Total Messages    : 9129
+  Throughput        : 494.68 msg/s
+
+======================================================================
+  PHASE 2: LINK DOWN (30s+)
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 6805
+  Avg Delay         : 4689.39 ms
+  Min Delay         : 0.68 ms
+  Max Delay         : 12487.86 ms
+  Std Dev Delay     : 4432.32 ms
+  Avg Jitter        : 42.58 ms
+
+  PACKET LOSS:
+    Expected        : 6805 messages
+    Received        : 6805 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 1613
+  Avg Delay         : 36732.68 ms
+  Min Delay         : 23131.29 ms
+  Max Delay         : 47567.58 ms
+  Std Dev Delay     : 6345.07 ms
+  Avg Jitter        : 82.32 ms
+
+  PACKET LOSS:
+    Expected        : 1613 messages
+    Received        : 1613 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+PHASE TOTAL:
+  Duration          : -3.31 s
+  Total Messages    : 8418
+  Throughput        : 0.00 msg/s
+
+======================================================================
+  PHASE COMPARISON (Impact of Core Failure)
+======================================================================
+
+ANOMALY:
+  Phase 1 Avg Delay : 4960.78 ms
+  Phase 2 Avg Delay : 4689.39 ms
+  Delay Increase    : -271.38 ms (-5.5%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 0.00%
+
+NORMAL:
+  Phase 1 Avg Delay : 12469.72 ms
+  Phase 2 Avg Delay : 36732.68 ms
+  Delay Increase    : +24262.97 ms (+194.6%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 0.00%
+
+======================================================================
+  REDUNDANCY VERDICT
+======================================================================
+
+  Phase 2 Messages Received: 8418
+  
+  ✓ REDUNDANCY WORKS! Traffic successfully rerouted via ring.
+    Link failure did NOT cause complete network outage.
+
+======================================================================
+Metrics saved to:
+  - CSV Data  : /home/mqtt-sdn/results/10-dscp-qos-14switches-corefailure/run_2025-12-01_12-33-22/mqtt_metrics_log.csv
+  - Summary   : /home/mqtt-sdn/results/10-dscp-qos-14switches-corefailure/run_2025-12-01_12-33-22/metrics_summary.txt
+======================================================================

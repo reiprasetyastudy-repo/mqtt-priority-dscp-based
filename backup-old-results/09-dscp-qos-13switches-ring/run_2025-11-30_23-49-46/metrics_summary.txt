@@ -1,0 +1,19 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 09-dscp-qos-13switches-ring
+  Topology          : DSCP Ring (13 switches, 15 links, 19 hosts)
+  Switches          : 13
+  Publishers        : 18
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps (500 Kbps)
+  QoS Queues        : True
+
+======================================================================
+
+TOTAL:
+  Duration          : 0.00 s
+  Total Messages    : 0
+  Throughput        : 0.00 msg/s

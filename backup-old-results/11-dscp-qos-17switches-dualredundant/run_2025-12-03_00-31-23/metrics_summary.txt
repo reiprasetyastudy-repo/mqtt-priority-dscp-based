@@ -1,0 +1,91 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 11-dscp-qos-17switches-dualredundant
+  Topology          : DSCP Dual-Redundant (17 switches)
+  Switches          : 17
+  Publishers        : 18
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps (500 Kbps)
+  QoS Queues        : True
+
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 16188
+  Avg Delay         : 11604.45 ms
+  Min Delay         : 0.36 ms
+  Max Delay         : 25595.64 ms
+  Std Dev Delay     : 7143.25 ms
+  Avg Jitter        : 253.93 ms
+
+  PACKET LOSS:
+    Expected        : 16188 messages
+    Received        : 16188 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 2997
+  Avg Delay         : 28200.79 ms
+  Min Delay         : 0.75 ms
+  Max Delay         : 55955.17 ms
+  Std Dev Delay     : 15943.39 ms
+  Avg Jitter        : 96.88 ms
+
+  PACKET LOSS:
+    Expected        : 2997 messages
+    Received        : 2997 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+    Avg Loss/Device : 0.00%
+
+TOTAL:
+  Duration          : 7.45 s
+  Total Messages    : 19185
+  Throughput        : 2574.65 msg/s
+
+======================================================================
+               PER-SENSOR METRICS (Sorted by Delay)
+======================================================================
+Device                              Type        Avg Delay    Count    Loss%
+----------------------------------------------------------------------
+sensor_f1r3_normal                  normal     29168.61ms      337    0.00%
+sensor_f3r2_normal                  normal     29077.57ms      340    0.00%
+sensor_f1r2_normal                  normal     28929.66ms      352    0.00%
+sensor_f3r3_normal                  normal     28923.79ms      277    0.00%
+sensor_f2r2_normal                  normal     28418.96ms      357    0.00%
+sensor_f3r1_normal                  normal     27882.27ms      301    0.00%
+sensor_f1r1_normal                  normal     27786.37ms      364    0.00%
+sensor_f2r3_normal                  normal     27049.07ms      306    0.00%
+sensor_f2r1_normal                  normal     26658.58ms      363    0.00%
+sensor_f3r2_anomaly                 anomaly    12781.47ms     1685    0.00%
+sensor_f2r3_anomaly                 anomaly    12647.16ms     1714    0.00%
+sensor_f2r2_anomaly                 anomaly    12598.34ms     1720    0.00%
+sensor_f2r1_anomaly                 anomaly    12502.24ms     1734    0.00%
+sensor_f1r2_anomaly                 anomaly    12326.32ms     1749    0.00%
+sensor_f1r1_anomaly                 anomaly    12290.92ms     1763    0.00%
+sensor_f1r3_anomaly                 anomaly    11992.81ms     1756    0.00%
+sensor_f3r3_anomaly                 anomaly     9301.02ms     2014    0.00%
+sensor_f3r1_anomaly                 anomaly     8899.89ms     2053    0.00%
+
+======================================================================
+                    PER-FLOOR SUMMARY
+======================================================================
+Floor    Type          Avg Delay    Count    Loss%
+----------------------------------------------------------------------
+Floor 1   anomaly      12203.30ms     5268    0.00%
+Floor 1   normal       28610.92ms     1053    0.00%
+Floor 2   anomaly      12582.29ms     5168    0.00%
+Floor 2   normal       27387.57ms     1026    0.00%
+Floor 3   anomaly      10177.42ms     5752    0.00%
+Floor 3   normal       28639.25ms      918    0.00%
+
+======================================================================
+  QoS IMPROVEMENT: 58.9% lower delay for anomaly traffic
+======================================================================

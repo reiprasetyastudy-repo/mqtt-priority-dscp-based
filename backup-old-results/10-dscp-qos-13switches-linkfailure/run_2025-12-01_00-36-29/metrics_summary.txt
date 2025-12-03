@@ -1,0 +1,181 @@
+
+======================================================================
+  LINK FAILURE TEST - SIMULATION SUMMARY
+  Scenario 10: DSCP QoS with Ring Topology + Link Failure
+======================================================================
+
+CONFIGURATION:
+  Phase 1 : Normal operation (all links active)
+  Phase 2 : Link s2-eth1 DOWN (traffic via ring)
+
+======================================================================
+  PHASE 1: NORMAL OPERATION
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 7500
+  Avg Delay         : 4073.90 ms
+  Min Delay         : 0.44 ms
+  Max Delay         : 10705.86 ms
+  Std Dev Delay     : 3201.34 ms
+  Avg Jitter        : 214.83 ms
+
+  PACKET LOSS:
+    Expected        : 7500 messages
+    Received        : 7500 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 1386
+  Avg Delay         : 10600.17 ms
+  Min Delay         : 0.94 ms
+  Max Delay         : 24994.48 ms
+  Std Dev Delay     : 7117.89 ms
+  Avg Jitter        : 321.63 ms
+
+  PACKET LOSS:
+    Expected        : 1386 messages
+    Received        : 1386 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+  PER-SENSOR METRICS (sorted by avg delay, highest first):
+  ----------------------------------------------------------------------------------
+  Sensor                     Floor Type       Recv Expect    Loss    Avg Delay
+  -------------------------- ----- -------- ------ ------ ------- ------------
+  sensor_f2r3_normal             2 normal      140    140    0.0%   11461.47ms
+  sensor_f3r1_normal             3 normal      120    120    0.0%   10994.76ms
+  sensor_f3r2_normal             3 normal      120    120    0.0%   10809.33ms
+  sensor_f1r3_normal             1 normal      166    166    0.0%   10748.49ms
+  sensor_f2r2_normal             2 normal      161    161    0.0%   10658.10ms
+  sensor_f2r1_normal             2 normal      167    167    0.0%   10564.24ms
+  sensor_f3r3_normal             3 normal      117    117    0.0%   10364.79ms
+  sensor_f1r1_normal             1 normal      198    198    0.0%   10178.77ms
+  sensor_f1r2_normal             1 normal      197    197    0.0%   10041.75ms
+  sensor_f2r3_anomaly            2 anomaly     740    740    0.0%    4928.86ms
+  sensor_f3r1_anomaly            3 anomaly     741    741    0.0%    4911.68ms
+  sensor_f2r2_anomaly            2 anomaly     795    795    0.0%    4575.95ms
+  sensor_f1r3_anomaly            1 anomaly     855    855    0.0%    4311.59ms
+  sensor_f2r1_anomaly            2 anomaly     851    851    0.0%    4296.47ms
+  sensor_f1r2_anomaly            1 anomaly     902    902    0.0%    4074.62ms
+  sensor_f1r1_anomaly            1 anomaly     952    952    0.0%    3857.13ms
+  sensor_f3r3_anomaly            3 anomaly     731    731    0.0%    3640.08ms
+  sensor_f3r2_anomaly            3 anomaly     933    933    0.0%    2442.20ms
+
+  PER-FLOOR SUMMARY:
+  ----------------------------------------------------------------------
+  Floor   Messages   Lost    Anomaly Avg     Normal Avg    Loss%
+  ----- ---------- ------ -------------- -------------- --------
+      1       3270      0      4081.11ms     10323.00ms    0.00%
+      2       2854      0      4600.42ms     10894.60ms    0.00%
+      3       2762      0      3664.65ms     10722.96ms    0.00%
+
+PHASE TOTAL: 8886 messages
+
+======================================================================
+  PHASE 2: LINK DOWN (s2-eth1 disabled)
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 25655
+  Avg Delay         : 28331.32 ms
+  Min Delay         : 4915.99 ms
+  Max Delay         : 53128.84 ms
+  Std Dev Delay     : 12738.02 ms
+  Avg Jitter        : 1119.65 ms
+
+  PACKET LOSS:
+    Expected        : 25655 messages
+    Received        : 25655 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 4737
+  Avg Delay         : 66132.60 ms
+  Min Delay         : 20273.65 ms
+  Max Delay         : 110672.96 ms
+  Std Dev Delay     : 24997.19 ms
+  Avg Jitter        : 414.53 ms
+
+  PACKET LOSS:
+    Expected        : 4737 messages
+    Received        : 4737 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+  PER-SENSOR METRICS (sorted by avg delay, highest first):
+  ----------------------------------------------------------------------------------
+  Sensor                     Floor Type       Recv Expect    Loss    Avg Delay
+  -------------------------- ----- -------- ------ ------ ------- ------------
+  sensor_f1r2_normal             1 normal      526    526    0.0%   68460.99ms
+  sensor_f1r1_normal             1 normal      520    520    0.0%   68172.08ms
+  sensor_f1r3_normal             1 normal      528    528    0.0%   67266.21ms
+  sensor_f2r2_normal             2 normal      528    528    0.0%   66923.81ms
+  sensor_f2r1_normal             2 normal      520    520    0.0%   66472.64ms
+  sensor_f2r3_normal             2 normal      528    528    0.0%   66244.39ms
+  sensor_f3r2_normal             3 normal      536    536    0.0%   64560.87ms
+  sensor_f3r1_normal             3 normal      528    528    0.0%   64189.96ms
+  sensor_f3r3_normal             3 normal      523    523    0.0%   62940.92ms
+  sensor_f1r3_anomaly            1 anomaly    2673   2673    0.0%   31886.06ms
+  sensor_f1r2_anomaly            1 anomaly    2672   2672    0.0%   31867.34ms
+  sensor_f1r1_anomaly            1 anomaly    2673   2673    0.0%   31861.50ms
+  sensor_f2r2_anomaly            2 anomaly    2680   2680    0.0%   31859.00ms
+  sensor_f2r1_anomaly            2 anomaly    2673   2673    0.0%   31851.64ms
+  sensor_f2r3_anomaly            2 anomaly    2673   2673    0.0%   31840.68ms
+  sensor_f3r1_anomaly            3 anomaly    2672   2672    0.0%   31811.66ms
+  sensor_f3r3_anomaly            3 anomaly    3214   3214    0.0%   22924.70ms
+  sensor_f3r2_anomaly            3 anomaly    3725   3725    0.0%   15296.87ms
+
+  PER-FLOOR SUMMARY:
+  ----------------------------------------------------------------------
+  Floor   Messages   Lost    Anomaly Avg     Normal Avg    Loss%
+  ----- ---------- ------ -------------- -------------- --------
+      1       9592      0     31871.63ms     67966.43ms    0.00%
+      2       9602      0     31850.44ms     66546.94ms    0.00%
+      3      11198      0     23344.41ms     63897.25ms    0.00%
+
+PHASE TOTAL: 30392 messages
+
+======================================================================
+  PHASE COMPARISON
+======================================================================
+
+ANOMALY:
+  Phase 1 Avg Delay : 4073.90 ms
+  Phase 2 Avg Delay : 28331.32 ms
+  Delay Change      : +24257.42 ms (+595.4%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 0.00%
+
+NORMAL:
+  Phase 1 Avg Delay : 10600.17 ms
+  Phase 2 Avg Delay : 66132.60 ms
+  Delay Change      : +55532.43 ms (+523.9%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 0.00%
+
+======================================================================
+  REDUNDANCY VERDICT
+======================================================================
+
+  Phase 2 Messages  : 30392
+  
+  ✓ REDUNDANCY WORKS!
+    Traffic successfully rerouted via ring after link failure.
+    Link s2↔s1 down, but Floor 1 traffic reached broker via s2→s3→s1 or s2→s4→s1.
+
+======================================================================
+  GRAND TOTAL
+======================================================================
+  Phase 1 Messages  : 8886
+  Phase 2 Messages  : 30392
+  Total Messages    : 39278
+======================================================================

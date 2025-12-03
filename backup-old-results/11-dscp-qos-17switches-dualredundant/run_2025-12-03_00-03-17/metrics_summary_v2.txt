@@ -1,0 +1,55 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+ANOMALY:
+  Devices           : 1
+  Messages Received : 163856
+  Avg Delay         : 113764.02 ms
+  Min Delay         : 0.37 ms
+  Max Delay         : 238367.97 ms
+  Std Dev Delay     : 67643.30 ms
+  Avg Jitter        : 1209.23 ms
+
+  PACKET LOSS:
+    Sent            : 29372 messages
+    Received        : 21321 messages
+    Lost            : 8051 messages
+    Loss Rate       : 27.41%
+    Avg Loss/Device : 27.41%
+
+NORMAL:
+  Devices           : 1
+  Messages Received : 29852
+  Avg Delay         : 267223.05 ms
+  Min Delay         : 0.52 ms
+  Max Delay         : 546162.42 ms
+  Std Dev Delay     : 154202.99 ms
+  Avg Jitter        : 277.68 ms
+
+  PACKET LOSS:
+    Sent            : 29429 messages
+    Received        : 3407 messages
+    Lost            : 26022 messages
+    Loss Rate       : 88.42%
+    Avg Loss/Device : 88.42%
+
+TOTAL:
+  Duration          : 69.41 s
+  Total Messages    : 193708
+  Throughput        : 2790.64 msg/s
+
+==========================================================================================
+PER-SENSOR METRICS (sorted by avg delay, highest first)
+==========================================================================================
+
+Sensor                     Floor Type       Recv   Sent    Loss    Avg Delay
+-------------------------- ----- -------- ------ ------ ------- ------------
+sensor_normal                N/A normal     3407  29429   88.4%  267223.05ms
+sensor_anomaly               N/A anomaly   21321  29372   27.4%  113764.02ms
+
+PER-FLOOR SUMMARY:
+----------------------------------------------------------------------
+Floor   Messages   Lost    Anomaly Avg     Normal Avg    Loss%
+----- ---------- ------ -------------- -------------- --------
+  N/A      24728  34073    113764.02ms    267223.05ms   57.95%

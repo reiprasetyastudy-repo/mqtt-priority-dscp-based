@@ -1,0 +1,169 @@
+
+======================================================================
+  LINK FAILURE TEST - SIMULATION SUMMARY
+  Scenario 10: DSCP QoS with Ring Topology + Core Failure
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 10-dscp-qos-14switches-corefailure
+  Topology          : DSCP Dual Core + Core Failure Test
+  Switches          : 14
+  Publishers        : 18
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps
+  QoS Queues        : True
+  Phase 1 Duration  : 30 seconds
+
+TEST PHASES:
+  Phase 1 (0-30s)  : Normal operation - all links active
+  Phase 2 (30s+)   : Link Core 2 (s2) DOWN - traffic via ring
+
+======================================================================
+  PHASE 1: NORMAL OPERATION (0-30s)
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 7749
+  Avg Delay         : 4998.93 ms
+  Min Delay         : 0.44 ms
+  Max Delay         : 12183.01 ms
+  Std Dev Delay     : 3347.98 ms
+  Avg Jitter        : 135.62 ms
+
+  PACKET LOSS:
+    Expected        : 7749 messages
+    Received        : 7749 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 1393
+  Avg Delay         : 12282.69 ms
+  Min Delay         : 0.72 ms
+  Max Delay         : 24779.55 ms
+  Std Dev Delay     : 7331.76 ms
+  Avg Jitter        : 135.88 ms
+
+  PACKET LOSS:
+    Expected        : 1393 messages
+    Received        : 1393 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+PHASE TOTAL:
+  Duration          : 21.32 s
+  Total Messages    : 9142
+  Throughput        : 428.86 msg/s
+
+======================================================================
+  PHASE 2: LINK DOWN (30s+)
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 6881
+  Avg Delay         : 4973.77 ms
+  Min Delay         : 0.55 ms
+  Max Delay         : 70213.19 ms
+  Std Dev Delay     : 5058.66 ms
+  Avg Jitter        : 97.71 ms
+
+  PACKET LOSS:
+    Expected        : 6881 messages
+    Received        : 6881 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 1614
+  Avg Delay         : 36899.20 ms
+  Min Delay         : 22997.05 ms
+  Max Delay         : 69234.79 ms
+  Std Dev Delay     : 6922.74 ms
+  Avg Jitter        : 82.18 ms
+
+  PACKET LOSS:
+    Expected        : 1614 messages
+    Received        : 1614 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+PHASE TOTAL:
+  Duration          : 12.27 s
+  Total Messages    : 8495
+  Throughput        : 692.52 msg/s
+
+======================================================================
+  PHASE COMPARISON (Impact of Core Failure)
+======================================================================
+
+ANOMALY:
+  Phase 1 Avg Delay : 4998.93 ms
+  Phase 2 Avg Delay : 4973.77 ms
+  Delay Increase    : -25.16 ms (-0.5%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 0.00%
+
+NORMAL:
+  Phase 1 Avg Delay : 12282.69 ms
+  Phase 2 Avg Delay : 36899.20 ms
+  Delay Increase    : +24616.51 ms (+200.4%)
+  
+  Phase 1 Loss Rate : 0.00%
+  Phase 2 Loss Rate : 0.00%
+
+======================================================================
+  COMBINED TOTAL (Phase 1 + Phase 2)
+======================================================================
+
+ANOMALY:
+  Total Messages    : 14630
+  Avg Delay         : 4987.10 ms
+  Min Delay         : 0.44 ms
+  Max Delay         : 70213.19 ms
+  Avg Jitter        : 117.79 ms
+  
+  PACKET LOSS:
+    Expected        : 14630 messages
+    Received        : 14630 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Total Messages    : 3007
+  Avg Delay         : 25495.54 ms
+  Min Delay         : 0.72 ms
+  Max Delay         : 69234.79 ms
+  Avg Jitter        : 107.06 ms
+  
+  PACKET LOSS:
+    Expected        : 3007 messages
+    Received        : 3007 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+OVERALL TOTAL:
+  Duration          : 33.58 s
+  Total Messages    : 17637
+  Throughput        : 525.17 msg/s
+
+  QoS IMPROVEMENT (Combined): 80.4% lower delay for anomaly traffic
+
+======================================================================
+  REDUNDANCY VERDICT
+======================================================================
+
+  Phase 2 Messages Received: 8495
+  
+  ✓ REDUNDANCY WORKS! Traffic successfully rerouted.
+    Core failure did NOT cause complete network outage.
+
+======================================================================
+Metrics saved to:
+  - CSV Data  : /home/mqtt-sdn/results/10-dscp-qos-14switches-corefailure/run_2025-12-01_18-20-43/mqtt_metrics_log.csv
+  - Summary   : /home/mqtt-sdn/results/10-dscp-qos-14switches-corefailure/run_2025-12-01_18-20-43/metrics_summary.txt
+======================================================================

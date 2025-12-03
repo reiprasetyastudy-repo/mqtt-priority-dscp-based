@@ -1,0 +1,49 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 06-dscp-qos-13switches
+  Topology          : DSCP Hierarchical 3-Tier (13 switches, 19 hosts)
+  Switches          : 13
+  Publishers        : 18
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps (500 Kbps)
+  QoS Queues        : True
+
+======================================================================
+
+ANOMALY:
+  Messages Received : 8948
+  Avg Delay         : 5125.94 ms
+  Min Delay         : 0.56 ms
+  Max Delay         : 13162.12 ms
+  Std Dev Delay     : 3871.86 ms
+  Avg Jitter        : 214.98 ms
+  Max Seq Number    : 1112
+
+  PACKET LOSS:
+    Expected        : 1113 messages
+    Received        : 1113 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Messages Received : 1653
+  Avg Delay         : 13188.44 ms
+  Min Delay         : 0.89 ms
+  Max Delay         : 29819.80 ms
+  Std Dev Delay     : 8529.69 ms
+  Avg Jitter        : 317.20 ms
+  Max Seq Number    : 232
+
+  PACKET LOSS:
+    Expected        : 233 messages
+    Received        : 233 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+TOTAL:
+  Duration          : 10.78 s
+  Total Messages    : 10601
+  Throughput        : 983.46 msg/s

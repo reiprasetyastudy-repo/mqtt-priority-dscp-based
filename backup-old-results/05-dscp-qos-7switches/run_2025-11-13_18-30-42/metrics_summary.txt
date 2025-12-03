@@ -1,0 +1,19 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+CONFIGURATION:
+  Scenario          : 05-dscp-qos
+  Topology          : DSCP-Based Hierarchical (7 switches, 8 publishers)
+  Switches          : 7
+  Publishers        : 8
+  Bandwidth Limit   : True
+  Bandwidth         : 0.5 Mbps (500 Kbps)
+  QoS Queues        : True
+
+======================================================================
+
+TOTAL:
+  Duration          : 0.00 s
+  Total Messages    : 0
+  Throughput        : 0.00 msg/s
