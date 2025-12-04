@@ -29,9 +29,9 @@ from shared.topology import BaseTopology
 SCENARIO_NAME = "06-distfailure-17switches"
 LINK_BANDWIDTH_MBPS = 0.2
 MSG_RATE = 10
-DURATION = 300
+DURATION = 600
 DRAIN_RATIO = 1.0
-FAILURE_TIME = 150  # Distribution switches fail at 150s
+FAILURE_TIME = 240  # Distribution switches fail at 240s (4 min) = 40% of duration
 
 SCENARIO_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(PROJECT_ROOT, f'results/{SCENARIO_NAME}')
@@ -135,10 +135,14 @@ class Scenario06Topology(BaseTopology):
         t.start()
 
 
-def run_experiment(duration=DURATION, drain_ratio=DRAIN_RATIO):
-    timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-    run_dir = os.path.join(RESULTS_DIR, f'run_{timestamp}')
-    os.makedirs(run_dir, exist_ok=True)
+def run_experiment(duration=DURATION, drain_ratio=DRAIN_RATIO, output_dir=None):
+    # Use provided output_dir or create new one
+    if output_dir and os.path.exists(output_dir):
+        run_dir = output_dir
+    else:
+        timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+        run_dir = os.path.join(RESULTS_DIR, f'run_{timestamp}')
+        os.makedirs(run_dir, exist_ok=True)
     os.makedirs(os.path.join(run_dir, 'logs'), exist_ok=True)
     os.chdir(run_dir)
     
@@ -168,5 +172,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--duration', '-d', type=int, default=DURATION)
     parser.add_argument('--drain-ratio', '-r', type=float, default=DRAIN_RATIO)
+    parser.add_argument('--output-dir', '-o', type=str, default=None,
+                        help='Output directory')
     args = parser.parse_args()
-    run_experiment(args.duration, args.drain_ratio)
+    run_experiment(args.duration, args.drain_ratio, args.output_dir)

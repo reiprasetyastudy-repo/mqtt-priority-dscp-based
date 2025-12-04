@@ -1,0 +1,116 @@
+3. Methodology
+A. Desain Penelitian
+Penelitian ini menggunakan pendekatan eksperimental dengan metode simulasi jaringan menggunakan Mininet sebagai platform emulasi Software-Defined Networking. Desain penelitian bersifat kuantitatif dengan melakukan pengujian performa pengiriman data IoT berbasis MQTT pada dua topologi jaringan yang berbeda. Eksperimen dirancang untuk membandingkan delay, jitter, dan packet loss antara traffic anomaly yang diberi prioritas tinggi (DSCP 46) dan traffic normal yang diberi prioritas rendah (DSCP 0). Setiap skenario dijalankan selama 10 menit dan diulang 3 kali untuk memastikan konsistensi hasil dan validitas data yang diperoleh.
+B. Arsitektur Sistem
+Arsitektur sistem terdiri dari tiga layer utama sesuai konsep Software-Defined Networking yaitu application layer, control layer, dan data layer. Pada application layer terdapat MQTT publisher yang mengirimkan data sensor dan MQTT subscriber yang menerima data di broker. Publisher melakukan DSCP tagging pada IP header menggunakan socket option IP_TOS untuk menandai prioritas data. Control layer menggunakan Ryu controller yang mengatur flow rules pada switch berdasarkan nilai DSCP. Data layer terdiri dari OpenFlow switches yang menjalankan flow rules dan melakukan queue management untuk membedakan prioritas traffic.
+
+Gambar 1: Arsitektur Sistem DSCP-Based QoS untuk MQTT
+Sistem bekerja dengan publisher men-set nilai DSCP pada IP header sebelum paket dikirim ke jaringan. Switch yang sudah memiliki flow rules dari controller akan mengarahkan paket ke queue berdasarkan DSCP value. Queue dengan prioritas lebih tinggi mendapat alokasi bandwidth lebih besar sehingga paket anomaly dikirim lebih cepat dibanding paket normal saat terjadi congestion. Pendekatan ini tidak memerlukan modifikasi protokol MQTT karena DSCP marking dilakukan di layer IP yang transparan terhadap aplikasi.
+C. Desain Topologi Jaringan
+Pengujian dilakukan pada dua topologi jaringan dengan kompleksitas berbeda untuk mengevaluasi skalabilitas dan efektivitas mekanisme DSCP priority. Topologi pertama menggunakan arsitektur hierarchical 3-tier dengan 13 switch yang terdiri dari 1 core switch, 3 aggregation switch, dan 9 edge switch dengan total 19 host termasuk 1 broker dan 18 publisher. Topologi ini mensimulasikan smart building dengan 3 lantai dimana setiap lantai memiliki 3 ruangan. Bandwidth setiap link dibatasi 0.5 Mbps untuk menciptakan kondisi congestion tinggi.
+
+Gambar 2: Topologi Jaringan Hierarchical 3-Tier (13 Switches)
+Gambar 2 mengilustrasikan topologi 13 switch, broker MQTT ditempatkan di core switch untuk menerima semua traffic dari publisher yang tersebar di 3 lantai. Setiap lantai memiliki 1 distribution switch yang menghubungkan 3 edge switch, dan setiap edge switch terhubung ke 2 publisher yaitu 1 publisher anomaly dan 1 publisher normal. Total terdapat 18 publisher dengan jarak 3 hop ke broker melewati edge switch, distribution switch, dan core switch.
+Topologi kedua menggunakan arsitektur dual-core dengan 14 switch untuk menguji apakah mekanisme DSCP priority tetap bekerja pada kondisi redundansi jaringan. Topologi ini terdiri dari 2 core switch, 3 distribution switch, dan 9 edge switch.
+
+Gambar 3: Topologi Jaringan Dual-Core (14 Switches)
+Gambar 3 mengilustrasikan topologi dual-core dimana broker terhubung ke dua core switch (s1 dan s2), setiap distribution switch (s3, s4, s5) memiliki koneksi ke kedua core, dan edge switch (s6-s14) melayani masing-masing 2 publisher. Topologi ini dipilih untuk menguji dua hal: pertama, apakah prioritas tetap berfungsi pada topologi dengan multiple path; kedua, apakah prioritas tetap dipertahankan ketika salah satu core switch mengalami kegagalan.
+Pengujian dilakukan dalam dua skenario. Skenario pertama menguji operasi normal dengan kedua core aktif. Skenario kedua mensimulasikan kegagalan core dengan dua fase: fase pertama sebagai baseline dengan kondisi normal, dan fase kedua dengan core switch s2 dinonaktifkan sehingga semua traffic melewati s1 saja. Perbandingan delay antara traffic anomaly dan normal pada fase kedua membuktikan apakah prioritas tetap dipertahankan setelah failover.
+D. Mekanisme DSCP Priority
+Mekanisme prioritas menggunakan Differentiated Services Code Point yang merupakan 6-bit field pada IP header sesuai standar RFC 2474. Penelitian ini mengimplementasikan 5 level prioritas dengan nilai DSCP berbeda untuk memberikan tingkatan pembeda dalam klasifikasi traffic.
+DSCP 46 untuk Expedited Forwarding sebagai prioritas sangat tinggi digunakan untuk data anomaly kritis. 
+DSCP 34 untuk Assured Forwarding class 4 sebagai prioritas tinggi untuk data sensor penting. 
+DSCP 26 untuk Assured Forwarding class 3 sebagai prioritas medium untuk monitoring reguler. 
+DSCP 10 untuk Assured Forwarding class 1 sebagai prioritas rendah untuk background data. 
+DSCP 0 untuk Best Effort sebagai prioritas default untuk data normal.
+Implementasi DSCP tagging dilakukan di application layer menggunakan Python socket option dengan memanggil fungsi setsockopt menggunakan parameter IPPROTO_IP dan IP_TOS. Setiap nilai DSCP dipetakan ke queue berbeda di OpenFlow switch dengan alokasi bandwidth proporsional. Queue 1 untuk DSCP 46 mendapat alokasi 60-80 persen dari total bandwidth, queue 2 untuk DSCP 34 mendapat 45-60 persen, queue 3 untuk DSCP 26 mendapat 30-45 persen, queue 4 untuk DSCP 10 mendapat 15-30 persen, dan queue 5 untuk DSCP 0 mendapat 5-15 persen. Pendekatan ini memungkinkan aplikasi MQTT mengontrol prioritas network tanpa memerlukan middleware untuk message inspection.
+E. Algoritma Traffic Prioritization
+Proses prioritisasi traffic MQTT berbasis DSCP dilakukan melalui dua tahap yaitu DSCP tagging di publisher dan traffic differentiation di switch. Algoritma 1 menjelaskan proses publisher melakukan klasifikasi data berdasarkan semantik aplikasi dan men-set DSCP value pada IP header.
+Algorithm 1: DSCP Tagging at Publisher
+Input : Data sensor reading (value)
+Output: MQTT packet with DSCP marking
+1  Read sensor data (value)
+2  if sensor = anomaly
+3      dscp_value = 46          // Expedited Forwarding
+4  else                                 // normal
+5      dscp_value = 0           // Best Effort
+6  end if
+7  Create JSON payload with (device, type, value, timestamp, seq)
+8 sock.setsockopt(IPPROTO_IP, IP_TOS, dscp_value << 2)
+9 Publish MQTT message to topic "iot/data" with QoS 1
+10 return Packet with DSCP marking in IP header
+11. End
+
+
+
+
+Algoritma 2 menjelaskan proses SDN controller dan switch melakukan differentiation dan queue assignment berdasarkan DSCP value yang terdeteksi.
+Algorithm 2: Traffic Differentiation and Queue Assignment
+Input : Incoming MQTT packet at switch
+Output: Packet forwarded to appropriate queue
+1  When packet arrives at switch:
+2:  Parse IP header
+3:  Extract DSCP value from ToS field (bits 2-7)
+4:  Match packet against flow table rules
+5:  if eth_type = 0x0806 then              // ARP packet
+6:      Action: FLOOD to all ports
+7:      Priority: 100
+8:  else if eth_type = 0x0800 then         // IPv4 packet
+9:      if ip_dscp = 46 then               // EF - Very High
+10:         Action: SetQueue(1) + Forward
+11:         Priority: 60
+12:         Bandwidth: 60-80%
+13:     else if ip_dscp = 34 then          // AF41 - High
+14:         Action: SetQueue(2) + Forward
+15:         Priority: 55
+16:         Bandwidth: 45-60%
+17:     else if ip_dscp = 26 then          // AF31 - Medium
+18:         Action: SetQueue(3) + Forward
+19:         Priority: 50
+20:         Bandwidth: 30-45%
+21:     else if ip_dscp = 10 then          // AF11 - Low
+22:         Action: SetQueue(4) + Forward
+23:         Priority: 45
+24:         Bandwidth: 15-30%
+25:     else if ip_dscp = 0 then           // BE - Best Effort
+26:         Action: SetQueue(5) + Forward
+27:         Priority: 40
+28:         Bandwidth: 5-15%
+29:     else
+30:         Action: NORMAL forwarding
+31:     end if
+32: end if
+33: HTB scheduler processes queues based on bandwidth allocation
+34: Queue 1 (highest priority) gets bandwidth first
+35: Remaining bandwidth distributed to lower priority queues
+36: return Packet forwarded with priority treatment
+37: End
+
+
+
+
+Algoritma 2 menunjukkan proses switch melakukan matching packet berdasarkan DSCP value dan mengarahkan ke queue yang sesuai. HTB scheduler memastikan queue dengan prioritas lebih tinggi mendapat bandwidth terlebih dahulu, sehingga paket anomaly tetap mendapat bandwidth cukup saat terjadi congestion.
+F. Implementasi SDN Controller
+SDN controller diimplementasikan menggunakan Ryu framework versi 4.34 dengan OpenFlow protokol versi 1.3. Controller menginstall flow rules ke semua switch saat switch connect melalui event handler switch_features_handler. Flow rules dipasang berdasarkan nilai DSCP di IP header dengan priority value berbeda sesuai Algoritma 2. Controller juga mengkonfigurasi queue management di setiap switch menggunakan ovs-vsctl command untuk membuat Hierarchical Token Bucket (HTB) queue dengan alokasi bandwidth sesuai mapping pada Section D.
+G. Implementasi Sistem MQTT
+Sistem MQTT menggunakan Mosquitto broker versi 2.0 yang berjalan pada host broker dengan IP address 10.0.0.1 dan listening pada port 1883. Publisher diimplementasikan menggunakan Python dengan library paho-mqtt versi 1.6. Setiap publisher mengirim data dalam format JSON yang berisi field device untuk identifier sensor, type untuk jenis traffic, value untuk nilai sensor reading, timestamp untuk waktu pengiriman, seq untuk sequence number, dscp untuk nilai DSCP yang digunakan, dan priority untuk nama prioritas.
+Publisher anomaly menghasilkan nilai sensor secara random dalam range 50 hingga 100 untuk mensimulasikan pembacaan sensor abnormal atau kondisi kritis. Publisher normal menghasilkan nilai dalam range 20 hingga 30 untuk mensimulasikan kondisi normal. Rate pengiriman message diatur 50 message per second untuk setiap publisher dengan ukuran payload rata-rata 150 bytes sehingga menghasilkan beban sekitar 60 Kbps per publisher. Dengan 18 publisher aktif bersamaan, total beban traffic mencapai 1.08 Mbps yang melebihi kapasitas link 0.5 Mbps dan menciptakan kondisi congestion untuk pengujian mekanisme prioritas.
+Subscriber diimplementasikan untuk menerima semua message dari broker dan melakukan pencatatan metrics untuk analisis performa. Subscriber mencatat timestamp saat message diterima dan membandingkan dengan timestamp saat message dikirim untuk menghitung end-to-end delay. Jitter dihitung sebagai variasi delay antar message berturutan. Packet loss dihitung dengan membandingkan sequence number yang diterima dengan sequence number yang diharapkan untuk mendeteksi message yang hilang. Semua metrics disimpan dalam format CSV untuk analisis statistik.
+H. Skenario Pengujian
+Eksperimen dilakukan pada dua skenario topologi berbeda untuk mengevaluasi efektivitas DSCP priority pada berbagai kondisi jaringan. Setiap skenario dijalankan dengan durasi 10 menit untuk memberikan waktu cukup bagi sistem mencapai kondisi steady state dan mengumpulkan data representatif. Eksperimen diulang 3 kali untuk setiap skenario dan hasil dirata-rata untuk mengurangi pengaruh variasi random. Pada setiap eksperimen, semua publisher dijalankan bersamaan dan mulai mengirim data setelah sistem stabil selama 5 detik. Subscriber mencatat semua message hingga durasi selesai kemudian melakukan perhitungan metrics dan menyimpan hasil dalam file CSV.
+I. Prosedur Eksperimen
+Prosedur eksperimen dimulai dengan membersihkan environment menggunakan command sudo mn -c dan sudo pkill untuk menghentikan proses sebelumnya. Langkah pertama adalah menjalankan Ryu controller dengan script yang mengaktivasi virtual environment. Langkah kedua adalah menjalankan Mininet topology yang membuat virtual network, menjalankan Mosquitto broker, mengkonfigurasi queue di semua switch, dan menjalankan semua publisher. Setelah komponen berjalan, sistem distabilkan 5 detik kemudian subscriber mencatat metrics selama 120 detik. Script otomatis menghentikan semua komponen dan menyimpan hasil CSV. Prosedur diulang 3 kali per skenario dengan interval 1 menit.
+I. Matrics Analisis Data
+Analisis data dilakukan dengan membandingkan metrics performa antara traffic anomaly dan traffic normal pada setiap skenario. Penelitian ini menggunakan empat kategori metrics utama untuk evaluasi QoS yang komprehensif.
+1. End-to-End Delay Metrics
+Delay diukur sebagai selisih waktu antara timestamp pengiriman message di publisher dengan timestamp penerimaan di subscriber, dihitung dalam satuan milliseconds. Untuk setiap skenario, dihitung empat statistik delay:
+Average Delay (μ): Rata-rata delay dari semua message, dihitung dengan formula μ = (Σ delay_i) / n, dimana n adalah jumlah total message. Metrik ini menunjukkan performa rata-rata sistem dalam mengirimkan message.
+Minimum Delay (min): Delay terkecil yang terjadi, menunjukkan best-case latency ketika jaringan tidak mengalami congestion.
+Maximum Delay (max): Delay terbesar yang terjadi, menunjukkan worst-case latency yang dapat dialami oleh message, penting untuk aplikasi real-time yang membutuhkan bounded latency.
+Standard Deviation : Deviasi standar delay yang menunjukkan konsistensi performa. Nilai standar deviasi yang rendah menunjukkan delay yang konsisten, sementara nilai tinggi menunjukkan variabilitas yang besar.
+2. Jitter Metrics
+Jitter diukur sebagai variasi delay antar message berturutan. Average jitter dihitung sebagai rata-rata dari semua nilai jitter. Metrik ini penting untuk mengevaluasi smoothness pengiriman data, dimana jitter rendah menunjukkan pengiriman yang stabil dan predictable. Jitter tinggi dapat menyebabkan masalah pada aplikasi real-time seperti monitoring sensor critical.
+3. Throughput Metrics
+Throughput dihitung sebagai jumlah total message yang diterima dibagi dengan durasi eksperimen dalam satuan messages per second (msg/s). Formula: throughput = total_messages / (timestamp_last - timestamp_first). Metrik ini menunjukkan kapasitas sistem dalam menangani beban traffic.
+K. Tools dan Lingkungan Eksperimen
+Eksperimen dilakukan pada virtual machine dengan spesifikasi Ubuntu 20.04 LTS, processor Intel Core dengan 4 CPU cores, memory RAM 8 GB, dan storage 50 GB. Mininet versi 2.3.0 digunakan sebagai network emulator. Open vSwitch versi 2.13 digunakan sebagai software switch yang mendukung OpenFlow 1.3 dan queue management HTB. Ryu framework versi 4.34 digunakan sebagai SDN controller. Mosquitto versi 2.0 digunakan sebagai MQTT broker. Publisher dan subscriber diimplementasikan dengan Python 3.8 menggunakan library paho-mqtt versi 1.6. Untuk analisis data digunakan library pandas, numpy, dan matplotlib.

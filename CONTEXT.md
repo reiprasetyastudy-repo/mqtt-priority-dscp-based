@@ -57,8 +57,11 @@ Framework QoS yang memprioritaskan data MQTT **anomaly/kritis** (alarm kebakaran
 ```python
 LINK_BANDWIDTH_MBPS = 0.2    # 200 Kbps (creates ~1.8x congestion)
 MSG_RATE = 10                # 10 msg/s per publisher (realistic IoT)
-DURATION = 300               # 5 minutes send phase
+DURATION = 600               # 10 minutes send phase
 DRAIN_RATIO = 1.0            # Drain time = Duration × 1.0
+
+# Untuk skenario failure (06):
+FAILURE_TIME = 240           # Failure di menit ke-4 (40% durasi)
 ```
 
 ### Hasil yang Diharapkan
@@ -184,11 +187,27 @@ cd /home/mqtt-sdn/scenarios/01-baseline-13switches
 sudo ./run_experiment.sh 60
 ```
 
-### Full Experiment (5 menit send + 5 menit drain)
+### Single Scenario (10 menit send + 10 menit drain)
 ```bash
 cd /home/mqtt-sdn/scenarios/01-baseline-13switches
-sudo ./run_experiment.sh 300
+sudo ./run_experiment.sh 600
 ```
+
+### Run All Scenarios Automatically (Background)
+```bash
+cd /home/mqtt-sdn
+nohup sudo ./run_all_experiments.sh > experiment_master.log 2>&1 &
+
+# Monitor progress
+tail -f experiment_master.log
+```
+
+Automated run configuration:
+- Scenarios: 01, 02, 05, 06
+- Runs per scenario: 3x
+- Duration per run: 20 minutes (10 send + 10 drain)
+- Delay between runs: 3 minutes
+- **Total estimated time: ~4.5 hours**
 
 ### Generate Summary
 ```bash
@@ -197,9 +216,7 @@ python3 /home/mqtt-sdn/generate_summary.py results/01-*/run_*/mqtt_metrics_log.c
 
 ### Cleanup
 ```bash
-sudo mn -c
-sudo pkill -f ryu-manager
-sudo pkill -f mosquitto
+sudo mn -c && sudo pkill -f ryu-manager && sudo pkill -f mosquitto
 ```
 
 ---
@@ -213,10 +230,10 @@ EXPERIMENT TIMING:
 │                   (publishers stopped, subscriber still receiving)
 └── Total Time    : DURATION × (1 + DRAIN_RATIO)
 
-Example with DURATION=300, DRAIN_RATIO=1.0:
-├── Send Phase    : 300 seconds (0:00 - 5:00)
-├── Drain Phase   : 300 seconds (5:00 - 10:00)
-└── Total Time    : 600 seconds (10 minutes)
+Example with DURATION=600, DRAIN_RATIO=1.0:
+├── Send Phase    : 600 seconds (0:00 - 10:00)
+├── Drain Phase   : 600 seconds (10:00 - 20:00)
+└── Total Time    : 1200 seconds (20 minutes)
 ```
 
 ### Drain Phase Verification
@@ -292,4 +309,4 @@ QoS working correctly!
 
 ---
 
-**Last Updated**: 2025-12-03
+**Last Updated**: 2025-12-05

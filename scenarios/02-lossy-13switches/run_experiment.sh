@@ -35,6 +35,6 @@ sleep 3
 
 echo "[2/2] Starting Topology..."
 cd "$RUN_DIR"
-sudo python3 "$SCENARIO_DIR/topology.py" --duration "$DURATION" 2>&1 | tee logs/experiment.log
+sudo python3 "$SCENARIO_DIR/topology.py" --duration "$DURATION" --output-dir "$RUN_DIR" 2>&1 | tee logs/experiment.log
 
 echo "Results: $RUN_DIR"
