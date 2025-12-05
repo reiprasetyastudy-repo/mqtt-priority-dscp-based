@@ -298,17 +298,17 @@ Tabel \ref{tab:baseline} menunjukkan hasil pengujian pada skenario baseline deng
 \textbf{Metric} & \textbf{Anomaly} & \textbf{Normal} \\
  & \textbf{(DSCP 46)} & \textbf{(DSCP 0)} \\
 \hline
-Messages Received & 53,635 & 11,716 \\
+Messages Received & 53,673 & 11,726 \\
 \hline
-Avg Delay (ms) & 228.60 & 237,399.55 \\
+Avg Delay (ms) & 213.92 & 237,611.75 \\
 \hline
-Min Delay (ms) & 0.88 & 1.04 \\
+Min Delay (ms) & 0.71 & 0.94 \\
 \hline
-Max Delay (ms) & 387.06 & 474,332.52 \\
+Max Delay (ms) & 319.85 & 475,515.26 \\
 \hline
-Std Dev Delay (ms) & 46.72 & 136,208.63 \\
+Std Dev Delay (ms) & 43.03 & 136,356.80 \\
 \hline
-Avg Jitter (ms) & 68.01 & 530.88 \\
+Avg Jitter (ms) & 60.76 & 530.80 \\
 \hline
 Packet Loss (\%) & 0.00 & 78.18 \\
 \hline
@@ -317,47 +317,177 @@ Packet Loss (\%) & 0.00 & 78.18 \\
 \end{center}
 \end{table}
 
-Hasil menunjukkan bahwa traffic anomaly dengan DSCP 46 mendapatkan delay rata-rata 228.60 ms dengan packet loss 0\%, sedangkan traffic normal dengan DSCP 0 mengalami delay rata-rata 237.4 detik (lebih dari 1000x lebih lambat) dan packet loss 78.18\%. Perbedaan signifikan ini membuktikan bahwa mekanisme DSCP-based QoS berhasil memprioritaskan traffic anomaly pada kondisi congestion.
+Hasil menunjukkan bahwa traffic anomaly dengan DSCP 46 mendapatkan delay rata-rata 213.92 ms dengan packet loss 0\%, sedangkan traffic normal dengan DSCP 0 mengalami delay rata-rata 237.6 detik (lebih dari 1000x lebih lambat) dan packet loss 78.18\%. Perbedaan signifikan ini membuktikan bahwa mekanisme DSCP-based QoS berhasil memprioritaskan traffic anomaly pada kondisi congestion.
 
 \subsection{Skenario 02: Lossy Network (13 Switches)}
 
-% TODO: Data dari eksperimen skenario 02
-Skenario ini menguji efektivitas mekanisme prioritas pada kondisi packet loss tambahan (10\% di core, 5\% di edge). Hasil eksperimen akan ditambahkan setelah pengujian selesai.
+Skenario ini menguji efektivitas mekanisme prioritas pada kondisi lossy network dengan packet loss tambahan pada link. Tabel \ref{tab:lossy} menunjukkan hasilnya.
+
+\begin{table}[htbp]
+\caption{Hasil Skenario Lossy Network (Rata-rata 3 Run)}
+\begin{center}
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{Metric} & \textbf{Anomaly} & \textbf{Normal} \\
+ & \textbf{(DSCP 46)} & \textbf{(DSCP 0)} \\
+\hline
+Messages Received & 53,629 & 11,617 \\
+\hline
+Avg Delay (ms) & 338.21 & 237,683.68 \\
+\hline
+Min Delay (ms) & 0.51 & 0.62 \\
+\hline
+Max Delay (ms) & 7,541.84 & 490,781.51 \\
+\hline
+Std Dev Delay (ms) & 289.96 & 136,477.28 \\
+\hline
+Avg Jitter (ms) & 103.67 & 534.66 \\
+\hline
+Packet Loss (\%) & 0.01 & 78.37 \\
+\hline
+\end{tabular}
+\label{tab:lossy}
+\end{center}
+\end{table}
+
+Pada kondisi lossy network, traffic anomaly tetap mendapatkan prioritas dengan packet loss hanya 0.01\%. Delay rata-rata meningkat menjadi 338.21 ms (dibanding 213.92 ms pada baseline) karena adanya retransmisi akibat packet loss pada link. Namun, perbedaan dengan traffic normal tetap sangat signifikan.
 
 \subsection{Skenario 05: Dual-Redundant (17 Switches)}
 
-% TODO: Data dari eksperimen skenario 05
-Skenario ini menguji mekanisme prioritas pada topologi dengan redundansi penuh di semua layer. Hasil eksperimen akan ditambahkan setelah pengujian selesai.
+Skenario ini menguji mekanisme prioritas pada topologi dengan redundansi penuh di semua layer menggunakan 17 switches dengan STP enabled. Tabel \ref{tab:redundant} menunjukkan hasilnya.
+
+\begin{table}[htbp]
+\caption{Hasil Skenario Dual-Redundant (Rata-rata 3 Run)}
+\begin{center}
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{Metric} & \textbf{Anomaly} & \textbf{Normal} \\
+ & \textbf{(DSCP 46)} & \textbf{(DSCP 0)} \\
+\hline
+Messages Received & 53,676 & 11,686 \\
+\hline
+Avg Delay (ms) & 212.76 & 237,891.29 \\
+\hline
+Min Delay (ms) & 0.74 & 0.69 \\
+\hline
+Max Delay (ms) & 362.73 & 475,505.73 \\
+\hline
+Std Dev Delay (ms) & 42.97 & 136,548.69 \\
+\hline
+Avg Jitter (ms) & 60.85 & 532.68 \\
+\hline
+Packet Loss (\%) & 0.00 & 78.25 \\
+\hline
+\end{tabular}
+\label{tab:redundant}
+\end{center}
+\end{table}
+
+Hasil menunjukkan performa yang sangat mirip dengan skenario baseline. Traffic anomaly tetap mendapatkan delay rendah (212.76 ms) dan packet loss 0\%. Hal ini membuktikan bahwa mekanisme prioritas bekerja dengan baik pada topologi yang lebih kompleks dengan redundansi.
 
 \subsection{Skenario 06: Distribution Failure (17 Switches)}
 
-% TODO: Data dari eksperimen skenario 06
-Skenario ini menguji apakah prioritas tetap dipertahankan setelah kegagalan pada distribution layer. Hasil eksperimen akan ditambahkan setelah pengujian selesai.
+Skenario ini menguji ketahanan mekanisme prioritas ketika terjadi kegagalan pada distribution layer. Switch distribusi dimatikan pada menit ke-4 (40\% durasi eksperimen) untuk mensimulasikan network failure. Tabel \ref{tab:failure} menunjukkan hasilnya.
+
+\begin{table}[htbp]
+\caption{Hasil Skenario Distribution Failure (Rata-rata 3 Run)}
+\begin{center}
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{Metric} & \textbf{Anomaly} & \textbf{Normal} \\
+ & \textbf{(DSCP 46)} & \textbf{(DSCP 0)} \\
+\hline
+Messages Received & 31,294 & 11,157 \\
+\hline
+Avg Delay (ms) & 28,848.30 & 233,839.60 \\
+\hline
+Min Delay (ms) & 0.39 & 0.84 \\
+\hline
+Max Delay (ms) & 317,984.65 & 515,749.42 \\
+\hline
+Std Dev Delay (ms) & 66,728.73 & 136,797.09 \\
+\hline
+Avg Jitter (ms) & 169.99 & 569.65 \\
+\hline
+Packet Loss (\%) & 41.73 & 79.23 \\
+\hline
+\end{tabular}
+\label{tab:failure}
+\end{center}
+\end{table}
+
+Pada kondisi failure, kedua jenis traffic mengalami degradasi performa. Traffic anomaly mengalami packet loss 41.73\% karena message yang sedang dalam perjalanan saat failure terjadi. Namun, traffic anomaly tetap mendapatkan perlakuan lebih baik dibanding traffic normal (79.23\% loss). Delay rata-rata anomaly meningkat signifikan (28.8 detik) karena waktu yang dibutuhkan untuk STP reconvergence.
 
 \subsection{Perbandingan Antar Skenario}
 
-% TODO: Tabel perbandingan semua skenario
-Tabel perbandingan komprehensif akan ditambahkan setelah semua skenario dijalankan.
+Tabel \ref{tab:comparison} menyajikan perbandingan komprehensif hasil semua skenario.
+
+\begin{table}[htbp]
+\caption{Perbandingan Hasil Semua Skenario}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Skenario} & \multicolumn{2}{c|}{\textbf{Avg Delay (ms)}} & \multicolumn{2}{c|}{\textbf{Packet Loss (\%)}} \\
+\cline{2-5}
+ & \textbf{Anomaly} & \textbf{Normal} & \textbf{Anomaly} & \textbf{Normal} \\
+\hline
+01-Baseline & 213.92 & 237,612 & 0.00 & 78.18 \\
+\hline
+02-Lossy & 338.21 & 237,684 & 0.01 & 78.37 \\
+\hline
+05-Redundant & 212.76 & 237,891 & 0.00 & 78.25 \\
+\hline
+06-Failure & 28,848 & 233,840 & 41.73 & 79.23 \\
+\hline
+\end{tabular}
+\label{tab:comparison}
+\end{center}
+\end{table}
+
+Dari tabel perbandingan terlihat bahwa:
+\begin{itemize}
+\item Pada kondisi normal (skenario 01, 02, 05), traffic anomaly selalu mendapatkan delay $<$350 ms dan packet loss $\approx$0\%.
+\item Traffic normal konsisten mengalami delay $\approx$237 detik dan packet loss $\approx$78\% pada semua skenario tanpa failure.
+\item Skenario failure menunjukkan degradasi pada kedua traffic, namun mekanisme prioritas tetap memberikan perlakuan lebih baik untuk anomaly.
+\end{itemize}
 
 \section{Discussion}
 
-Hasil eksperimen skenario baseline menunjukkan bahwa kerangka kerja DSCP-based QoS berhasil mencapai tujuan utama penelitian. Traffic anomaly yang ditandai dengan DSCP 46 mendapatkan perlakuan prioritas tinggi dengan delay rata-rata hanya 228.60 ms dan packet loss 0\%, sementara traffic normal dengan DSCP 0 mengalami delay lebih dari 237 detik dan packet loss 78.18\%.
+Hasil eksperimen dari empat skenario menunjukkan bahwa kerangka kerja DSCP-based QoS berhasil mencapai tujuan utama penelitian. Berikut analisis mendalam dari setiap aspek:
 
-Perbedaan performa yang signifikan ini menunjukkan bahwa mekanisme HTB queue dengan alokasi bandwidth 60-80\% untuk Queue 1 (DSCP 46) efektif dalam melindungi traffic prioritas tinggi dari congestion. Pada kondisi beban 1.8x kapasitas link, sistem berhasil memastikan semua message anomaly terkirim tanpa kehilangan data.
+\subsection{Efektivitas Mekanisme Prioritas}
 
-Dibandingkan dengan pendekatan broker-level seperti p-MQTT \cite{b3} yang hanya memprioritaskan di application layer, pendekatan ini memberikan proteksi QoS di network layer sehingga traffic prioritas terlindungi sejak meninggalkan publisher. Dibandingkan dengan RT-MQTT \cite{b2} yang memerlukan deep packet inspection, pendekatan DSCP marking lebih sederhana dan scalable karena tidak memerlukan inspeksi payload.
+Pada kondisi operasi normal (skenario 01, 02, 05), traffic anomaly dengan DSCP 46 konsisten mendapatkan delay rata-rata 212-338 ms dan packet loss mendekati 0\%. Sementara itu, traffic normal dengan DSCP 0 mengalami delay rata-rata 237 detik (lebih dari 1000x lebih lambat) dan packet loss sekitar 78\%. Perbedaan yang sangat signifikan ini membuktikan bahwa mekanisme HTB queue dengan alokasi bandwidth 60-80\% untuk Queue 1 efektif dalam melindungi traffic prioritas tinggi.
 
-% TODO: Analisis lebih lanjut setelah semua skenario selesai
-Diskusi lebih komprehensif termasuk perbandingan antar skenario akan ditambahkan setelah semua eksperimen selesai.
+\subsection{Ketahanan Terhadap Kondisi Lossy}
+
+Skenario 02 menunjukkan bahwa pada kondisi lossy network, mekanisme prioritas tetap efektif. Meskipun delay rata-rata anomaly meningkat dari 213.92 ms menjadi 338.21 ms (peningkatan 58\%), packet loss tetap hanya 0.01\%. Peningkatan delay ini disebabkan oleh retransmisi pada layer TCP, namun tidak mempengaruhi reliabilitas pengiriman message prioritas tinggi.
+
+\subsection{Skalabilitas pada Topologi Kompleks}
+
+Skenario 05 dengan topologi dual-redundant 17 switches menunjukkan performa yang hampir identik dengan skenario baseline (delay 212.76 ms vs 213.92 ms). Hal ini membuktikan bahwa mekanisme DSCP-based QoS dapat di-scale ke topologi yang lebih kompleks tanpa degradasi performa.
+
+\subsection{Ketahanan Terhadap Failure}
+
+Skenario 06 menunjukkan bahwa pada kondisi failure, kedua jenis traffic mengalami degradasi. Namun, traffic anomaly tetap mendapatkan perlakuan lebih baik dengan packet loss 41.73\% dibanding traffic normal (79.23\%). Tingginya packet loss anomaly pada skenario ini disebabkan oleh message yang sedang dalam perjalanan saat failure terjadi dan waktu yang dibutuhkan untuk STP reconvergence (30-45 detik).
+
+\subsection{Perbandingan dengan Pendekatan Lain}
+
+Dibandingkan dengan pendekatan broker-level seperti p-MQTT \cite{b3} yang hanya memprioritaskan di application layer, pendekatan ini memberikan proteksi QoS di network layer sehingga traffic prioritas terlindungi sejak meninggalkan publisher. Dibandingkan dengan RT-MQTT \cite{b2} yang memerlukan middleware tambahan dan deep packet inspection, pendekatan DSCP marking lebih sederhana dan scalable karena memanfaatkan mekanisme DiffServ standar yang sudah didukung oleh perangkat jaringan.
 
 \section{Conclusion}
 
-Penelitian ini mengusulkan kerangka kerja QoS berbasis DSCP untuk prioritas traffic MQTT pada jaringan Software-Defined Networking. Hasil eksperimen pada skenario baseline menunjukkan bahwa pendekatan ini efektif dalam memprioritaskan traffic anomaly dengan delay rata-rata 228.60 ms dan packet loss 0\%, dibandingkan traffic normal yang mengalami delay 237 detik dan packet loss 78.18\%.
+Penelitian ini mengusulkan dan memvalidasi kerangka kerja QoS berbasis DSCP untuk prioritas traffic MQTT pada jaringan Software-Defined Networking. Hasil eksperimen pada empat skenario yang berbeda menunjukkan efektivitas pendekatan ini:
 
-Kontribusi utama penelitian ini meliputi: (1) implementasi DSCP marking pada publisher MQTT menggunakan socket option yang transparan terhadap protokol MQTT, (2) integrasi dengan SDN controller untuk automatic queue assignment berdasarkan DSCP value, dan (3) validasi eksperimental pada topologi hierarchical dengan kondisi congestion realistis.
+\begin{itemize}
+\item Pada kondisi operasi normal (skenario baseline, lossy, dan dual-redundant), traffic anomaly konsisten mendapatkan delay 212-338 ms dan packet loss mendekati 0\%, dibandingkan traffic normal dengan delay 237 detik dan packet loss 78\%.
+\item Mekanisme prioritas tetap efektif pada topologi kompleks dengan 17 switches dan STP enabled.
+\item Pada kondisi failure, traffic anomaly tetap mendapatkan perlakuan lebih baik (41.73\% loss vs 79.23\% untuk normal).
+\end{itemize}
 
-% TODO: Kesimpulan lengkap setelah semua skenario selesai
-Kesimpulan komprehensif termasuk analisis semua skenario dan rekomendasi future work akan ditambahkan setelah eksperimen selesai.
+Kontribusi utama penelitian ini meliputi: (1) implementasi DSCP marking pada publisher MQTT menggunakan socket option yang transparan terhadap protokol MQTT, (2) integrasi dengan SDN controller untuk automatic queue assignment berdasarkan DSCP value, (3) validasi eksperimental pada empat skenario berbeda dengan kondisi congestion realistis, dan (4) demonstrasi skalabilitas pada topologi dengan redundansi penuh.
+
+Future work dapat mencakup: (a) evaluasi pada topologi dengan jumlah switch lebih besar, (b) implementasi dynamic priority adjustment berdasarkan kondisi jaringan, dan (c) integrasi dengan mekanisme Time-Sensitive Networking (TSN) untuk aplikasi industrial yang memerlukan deterministic latency.
 
 \begin{thebibliography}{00}
 \bibitem{b1} G. Patti, L. L. Bello, and L. Leonardi, ``PrioMQTT: An MQTT Extension Supporting Prioritized Communications,'' IEEE Trans. Ind. Informat., 2024.

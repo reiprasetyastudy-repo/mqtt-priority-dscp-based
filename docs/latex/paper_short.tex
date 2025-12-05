@@ -204,51 +204,49 @@ Eksperimen dilakukan pada VM Ubuntu 20.04 LTS (4 CPU cores, 8GB RAM) dengan Mini
 
 \section{Results}
 
-Tabel \ref{tab:results} menunjukkan hasil eksperimen skenario baseline pada topologi hierarchical 13 switch dengan rata-rata 3 kali pengulangan.
+Eksperimen dilakukan pada empat skenario dengan 3 kali pengulangan per skenario. Tabel \ref{tab:comparison} menyajikan perbandingan hasil semua skenario.
 
 \begin{table}[htbp]
-\caption{Hasil Skenario Baseline (Rata-rata 3 Run)}
+\caption{Perbandingan Hasil Semua Skenario (Rata-rata 3 Run)}
 \begin{center}
-\begin{tabular}{|l|r|r|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
-\textbf{Metric} & \textbf{Anomaly} & \textbf{Normal} \\
- & \textbf{(DSCP 46)} & \textbf{(DSCP 0)} \\
+\textbf{Skenario} & \multicolumn{2}{c|}{\textbf{Avg Delay (ms)}} & \multicolumn{2}{c|}{\textbf{Packet Loss (\%)}} \\
+\cline{2-5}
+ & \textbf{Anomaly} & \textbf{Normal} & \textbf{Anomaly} & \textbf{Normal} \\
 \hline
-Messages Received & 53,635 & 11,716 \\
+01-Baseline & 213.92 & 237,612 & 0.00 & 78.18 \\
 \hline
-Avg Delay (ms) & 228.60 & 237,399.55 \\
+02-Lossy & 338.21 & 237,684 & 0.01 & 78.37 \\
 \hline
-Min Delay (ms) & 0.88 & 1.04 \\
+05-Redundant & 212.76 & 237,891 & 0.00 & 78.25 \\
 \hline
-Max Delay (ms) & 387.06 & 474,332.52 \\
-\hline
-Std Dev Delay (ms) & 46.72 & 136,208.63 \\
-\hline
-Avg Jitter (ms) & 68.01 & 530.88 \\
-\hline
-Packet Loss (\%) & 0.00 & 78.18 \\
+06-Failure & 28,848 & 233,840 & 41.73 & 79.23 \\
 \hline
 \end{tabular}
-\label{tab:results}
+\label{tab:comparison}
 \end{center}
 \end{table}
 
-Traffic anomaly (DSCP 46) mendapatkan delay rata-rata 228.60 ms dengan packet loss 0\%, sedangkan traffic normal (DSCP 0) mengalami delay 237 detik dan packet loss 78.18\%. Perbedaan lebih dari 1000x ini membuktikan efektivitas mekanisme DSCP-based QoS.
+Pada kondisi operasi normal (skenario 01, 02, 05), traffic anomaly (DSCP 46) konsisten mendapatkan delay 212-338 ms dan packet loss mendekati 0\%, sedangkan traffic normal (DSCP 0) mengalami delay sekitar 237 detik dan packet loss sekitar 78\%. Perbedaan lebih dari 1000x ini membuktikan efektivitas mekanisme DSCP-based QoS.
 
-% TODO: Hasil skenario 02, 05, 06 akan ditambahkan
-Hasil skenario lossy network, dual-redundant, dan distribution failure akan ditambahkan setelah eksperimen selesai.
+Pada skenario failure (06), kedua traffic mengalami degradasi karena network failure pada menit ke-4. Namun, traffic anomaly tetap mendapatkan perlakuan lebih baik dengan packet loss 41.73\% dibanding 79.23\% untuk normal.
 
 \section{Discussion}
 
-Hasil eksperimen menunjukkan keberhasilan kerangka kerja DSCP-based QoS dalam memprioritaskan traffic MQTT. Mekanisme HTB queue dengan alokasi bandwidth 60-80\% untuk Queue 1 (DSCP 46) efektif melindungi traffic prioritas tinggi dari congestion. Dibandingkan dengan p-MQTT \cite{b3} yang hanya bekerja di broker, pendekatan ini memberikan proteksi di network layer. Dibandingkan dengan RT-MQTT \cite{b2} yang memerlukan deep packet inspection, DSCP marking lebih sederhana dan scalable.
+Hasil eksperimen dari empat skenario menunjukkan keberhasilan kerangka kerja DSCP-based QoS. Beberapa temuan penting:
 
-% TODO: Diskusi lengkap setelah semua skenario selesai
+\textbf{Efektivitas}: Mekanisme HTB queue dengan alokasi bandwidth 60-80\% untuk Queue 1 efektif melindungi traffic prioritas. Pada kondisi congestion 1.8x kapasitas, traffic anomaly tetap terkirim dengan delay minimal dan tanpa packet loss.
+
+\textbf{Skalabilitas}: Performa pada topologi 17 switches hampir identik dengan 13 switches, menunjukkan skalabilitas yang baik.
+
+\textbf{Ketahanan}: Pada kondisi lossy, delay meningkat 58\% namun reliabilitas tetap terjaga. Pada kondisi failure, degradasi terjadi namun prioritas tetap dipertahankan.
+
+Dibandingkan dengan p-MQTT \cite{b3} yang bekerja di broker, pendekatan ini memberikan proteksi di network layer. Dibandingkan dengan RT-MQTT \cite{b2} yang memerlukan middleware, DSCP marking lebih sederhana dan scalable.
 
 \section{Conclusion}
 
-Penelitian ini mengusulkan kerangka kerja QoS berbasis DSCP untuk prioritas traffic MQTT pada SDN. Hasil eksperimen baseline menunjukkan efektivitas pendekatan dengan delay anomaly 228.60 ms (packet loss 0\%) versus delay normal 237 detik (packet loss 78.18\%). Kontribusi meliputi: DSCP marking transparan pada publisher, integrasi SDN controller untuk queue assignment, dan validasi eksperimental pada kondisi congestion realistis.
-
-% TODO: Kesimpulan lengkap setelah semua skenario selesai
+Penelitian ini memvalidasi kerangka kerja QoS berbasis DSCP untuk prioritas traffic MQTT pada SDN. Hasil eksperimen menunjukkan: (1) traffic anomaly mendapatkan delay 212-338 ms dan packet loss 0\% pada kondisi normal, (2) mekanisme efektif pada topologi dengan redundansi, dan (3) prioritas tetap dipertahankan pada kondisi failure. Kontribusi meliputi implementasi DSCP marking transparan, integrasi SDN controller, dan validasi pada empat skenario berbeda.
 
 \begin{thebibliography}{00}
 \bibitem{b1} G. Patti, L. L. Bello, and L. Leonardi, ``PrioMQTT: An MQTT Extension Supporting Prioritized Communications,'' IEEE Trans. Ind. Informat., 2024.
