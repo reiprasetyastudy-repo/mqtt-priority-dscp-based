@@ -39,8 +39,7 @@ Surabaya, Indonesia \\
 \maketitle
 
 \begin{abstract}
-% TODO: Abstract akan ditambahkan setelah hasil eksperimen selesai
-Internet of Things (IoT) menghasilkan data sensor dalam jumlah besar dengan tingkat urgensi yang berbeda. MQTT sebagai protokol komunikasi IoT yang ringan tidak menyediakan mekanisme prioritas bawaan. Penelitian ini mengusulkan kerangka kerja QoS berbasis DSCP untuk MQTT dengan memanfaatkan kemampuan SDN. Publisher menambahkan nilai DSCP pada header IP menggunakan socket option, kemudian controller SDN menginstal flow rules yang memetakan nilai DSCP tersebut ke antrian prioritas di Open vSwitch. Sistem diuji pada topologi hierarkis tiga tingkat dengan 13 switch dan 19 host untuk mengevaluasi delay, jitter, dan packet loss pada kondisi congestion.
+Internet of Things (IoT) menghasilkan data sensor dalam jumlah besar dengan tingkat urgensi yang berbeda. Data anomaly seperti indikasi kebocoran gas memerlukan pengiriman lebih cepat dibanding data monitoring rutin. MQTT sebagai protokol komunikasi IoT yang ringan tidak menyediakan mekanisme prioritas bawaan, sehingga semua pesan diperlakukan sama saat terjadi congestion. Penelitian ini mengusulkan kerangka kerja QoS berbasis DSCP (Differentiated Services Code Point) untuk MQTT dengan memanfaatkan kemampuan Software-Defined Networking (SDN). Publisher menambahkan nilai DSCP pada header IP menggunakan socket option, kemudian controller SDN menginstal flow rules yang memetakan nilai DSCP ke antrian prioritas menggunakan Hierarchical Token Bucket (HTB) di Open vSwitch. Sistem diuji pada empat skenario dengan dua topologi (hierarchical 13 switch dan dual-redundant 17 switch) untuk mengevaluasi delay, jitter, throughput, dan packet loss pada kondisi congestion 1.8x kapasitas link. Hasil eksperimen menunjukkan traffic anomaly (DSCP 46) mencapai delay 1,110x lebih cepat dan packet loss 0\% dibanding traffic normal, dengan jitter 8.7x lebih rendah untuk predictability yang lebih baik.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -177,8 +176,34 @@ SDN controller diimplementasikan menggunakan Ryu framework 4.34 dengan OpenFlow 
 
 Sistem MQTT menggunakan Mosquitto broker 2.0 pada port 1883. Publisher diimplementasikan dengan Python menggunakan paho-mqtt 1.6. Publisher anomaly menghasilkan nilai sensor dalam range 50-100, sedangkan publisher normal dalam range 20-30. Rate pengiriman 10 msg/s per publisher dengan payload 150 bytes, sehingga 18 publisher dengan overhead protokol menghasilkan total beban sekitar 360 Kbps yang melebihi kapasitas link 200 Kbps (congestion 1.8x).
 
-\subsection{Skenario dan Metrics Pengujian}
-Eksperimen dijalankan pada empat skenario (baseline, lossy, dual-redundant, distribution failure) dengan durasi 5 menit fase pengiriman dan 5 menit fase drain, diulang 3 kali untuk konsistensi hasil. Empat metrics utama digunakan untuk evaluasi QoS:
+\subsection{Skenario Pengujian}
+
+Empat skenario dirancang untuk menguji berbagai kondisi jaringan seperti ditunjukkan pada Tabel \ref{tab:skenario}.
+
+\begin{table}[htbp]
+\caption{Deskripsi Skenario Pengujian}
+\begin{center}
+\begin{tabular}{|c|l|c|p{3.5cm}|}
+\hline
+\textbf{\#} & \textbf{Skenario} & \textbf{Topo} & \textbf{Kondisi} \\
+\hline
+01 & Baseline & 13 sw & Normal, tanpa gangguan \\
+\hline
+02 & Lossy & 13 sw & Packet loss pada link \\
+\hline
+05 & Redundant & 17 sw & STP enabled, dual-core \\
+\hline
+06 & Failure & 17 sw & Dist. switch mati menit ke-4 \\
+\hline
+\end{tabular}
+\label{tab:skenario}
+\end{center}
+\end{table}
+
+Setiap skenario dijalankan dengan durasi 10 menit fase pengiriman dan 10 menit fase drain untuk memastikan semua message dalam queue terproses. Pengujian diulang 3 kali untuk memastikan konsistensi statistik.
+
+\subsection{Metrics Evaluasi}
+Empat metrics utama digunakan untuk evaluasi QoS:
 
 \textbf{End-to-End Delay}: selisih waktu antara pengiriman dan penerimaan message.
 \begin{equation}
@@ -204,7 +229,21 @@ Eksperimen dilakukan pada VM Ubuntu 20.04 LTS (4 CPU cores, 8GB RAM) dengan Mini
 
 \section{Results}
 
-Eksperimen dilakukan pada empat skenario dengan 3 kali pengulangan per skenario. Tabel \ref{tab:comparison} menyajikan perbandingan hasil semua skenario.
+Bagian ini menyajikan hasil eksperimen dari empat skenario pengujian. Setiap skenario dijalankan 3 kali dan hasilnya dirata-rata untuk memastikan konsistensi.
+
+\subsection{Hasil Per-Skenario}
+
+\textbf{Skenario 01 - Baseline (13 Switches):} Topologi hierarchical tanpa kondisi khusus. Traffic anomaly mendapatkan delay rata-rata 213.92 ms dengan packet loss 0\%, sedangkan traffic normal mengalami delay 237.6 detik dan packet loss 78.18\%.
+
+\textbf{Skenario 02 - Lossy Network (13 Switches):} Kondisi dengan packet loss tambahan pada link. Delay anomaly meningkat menjadi 338.21 ms namun packet loss tetap hanya 0.01\%.
+
+\textbf{Skenario 05 - Dual-Redundant (17 Switches):} Topologi dengan redundansi penuh dan STP enabled. Performa hampir identik dengan baseline (delay 212.76 ms, loss 0\%).
+
+\textbf{Skenario 06 - Distribution Failure (17 Switches):} Switch distribusi dimatikan pada menit ke-4. Kedua traffic mengalami degradasi, namun anomaly tetap lebih baik (41.73\% loss vs 79.23\%).
+
+\subsection{Perbandingan Antar Skenario}
+
+Tabel \ref{tab:scenarios} menyajikan perbandingan komprehensif hasil semua skenario.
 
 \begin{table}[htbp]
 \caption{Perbandingan Hasil Semua Skenario (Rata-rata 3 Run)}
@@ -224,69 +263,103 @@ Eksperimen dilakukan pada empat skenario dengan 3 kali pengulangan per skenario.
 06-Failure & 28,848 & 233,840 & 41.73 & 79.23 \\
 \hline
 \end{tabular}
-\label{tab:comparison}
+\label{tab:scenarios}
 \end{center}
 \end{table}
 
 Pada kondisi operasi normal (skenario 01, 02, 05), traffic anomaly (DSCP 46) konsisten mendapatkan delay 212-338 ms dan packet loss mendekati 0\%, sedangkan traffic normal (DSCP 0) mengalami delay sekitar 237 detik dan packet loss sekitar 78\%. Perbedaan lebih dari 1000x ini membuktikan efektivitas mekanisme DSCP-based QoS.
 
-Pada skenario failure (06), kedua traffic mengalami degradasi karena network failure pada menit ke-4. Namun, traffic anomaly tetap mendapatkan perlakuan lebih baik dengan packet loss 41.73\% dibanding 79.23\% untuk normal.
-
 \subsection{Analisis Jitter dan Throughput}
 
-Tabel \ref{tab:jitter} menyajikan perbandingan jitter (variasi delay) dan throughput antar skenario.
+Tabel \ref{tab:jitter} menyajikan perbandingan jitter dan throughput. Jitter merepresentasikan variasi delay yang penting untuk aplikasi real-time.
 
 \begin{table}[htbp]
 \caption{Perbandingan Jitter dan Throughput}
 \begin{center}
-\begin{tabular}{|l|c|c|r|}
+\begin{tabular}{|l|c|c|c|r|}
 \hline
-\textbf{Skenario} & \textbf{Jitter Anomaly} & \textbf{Jitter Normal} & \textbf{Throughput} \\
+\textbf{Skenario} & \textbf{Jitter A} & \textbf{Jitter N} & \textbf{Ratio} & \textbf{Throughput} \\
 \hline
-01-Baseline & 60.76 ms & 530.80 ms & 494.87 msg/s \\
+01-Baseline & 60.76 ms & 530.80 ms & 8.7x & 494.87 msg/s \\
 \hline
-02-Lossy & 103.67 ms & 534.66 ms & 509.97 msg/s \\
+02-Lossy & 103.67 ms & 534.66 ms & 5.2x & 509.97 msg/s \\
 \hline
-05-Redundant & 60.85 ms & 532.68 ms & 498.20 msg/s \\
+05-Redundant & 60.85 ms & 532.68 ms & 8.8x & 498.20 msg/s \\
 \hline
-06-Failure & 169.99 ms & 569.65 ms & 391.21 msg/s \\
+06-Failure & 169.99 ms & 569.65 ms & 3.4x & 391.21 msg/s \\
 \hline
 \end{tabular}
 \label{tab:jitter}
 \end{center}
 \end{table}
 
-Traffic anomaly memiliki jitter 8.7x lebih rendah dibanding normal pada kondisi baseline, menunjukkan delay yang lebih predictable untuk traffic prioritas.
+Traffic anomaly memiliki jitter 8.7x lebih rendah dibanding normal pada kondisi baseline, menunjukkan delay yang lebih predictable. Throughput pada skenario normal konsisten sekitar 495-510 msg/s, sementara skenario failure turun menjadi 391 msg/s.
 
 \subsection{Analisis Per-Sensor}
 
-Tabel \ref{tab:persensor} menunjukkan sampel hasil per-sensor pada skenario baseline.
+Tabel \ref{tab:persensor} menunjukkan hasil per-sensor pada skenario baseline untuk memverifikasi konsistensi mekanisme prioritas di semua lokasi.
 
 \begin{table}[htbp]
-\caption{Sampel Hasil Per-Sensor (Baseline)}
+\caption{Hasil Per-Sensor Skenario Baseline}
 \begin{center}
-\begin{tabular}{|l|r|r|r|}
+\begin{tabular}{|l|c|r|r|r|}
 \hline
-\textbf{Sensor} & \textbf{Sent} & \textbf{Recv} & \textbf{Loss \%} \\
+\textbf{Sensor} & \textbf{Floor} & \textbf{Sent} & \textbf{Recv} & \textbf{Delay} \\
 \hline
-\multicolumn{4}{|c|}{\textit{Anomaly (DSCP 46)}} \\
+\multicolumn{5}{|c|}{\textit{Anomaly Traffic (DSCP 46) - Loss: 0\%}} \\
 \hline
-sensor\_f1r1\_anomaly & 5,968 & 5,968 & 0.0\% \\
-sensor\_f2r2\_anomaly & 5,964 & 5,964 & 0.0\% \\
-sensor\_f3r3\_anomaly & 5,960 & 5,960 & 0.0\% \\
+sensor\_f1r1\_anomaly & 1 & 5,968 & 5,968 & 212.96 ms \\
+sensor\_f1r2\_anomaly & 1 & 5,967 & 5,967 & 218.38 ms \\
+sensor\_f2r1\_anomaly & 2 & 5,965 & 5,965 & 219.73 ms \\
+sensor\_f2r2\_anomaly & 2 & 5,964 & 5,964 & 209.80 ms \\
+sensor\_f3r1\_anomaly & 3 & 5,962 & 5,962 & 213.47 ms \\
+sensor\_f3r3\_anomaly & 3 & 5,960 & 5,960 & 206.75 ms \\
 \hline
-\multicolumn{4}{|c|}{\textit{Normal (DSCP 0)}} \\
+\multicolumn{5}{|c|}{\textit{Normal Traffic (DSCP 0) - Loss: ~78\%}} \\
 \hline
-sensor\_f1r1\_normal & 5,975 & 1,306 & 78.1\% \\
-sensor\_f2r2\_normal & 5,971 & 1,315 & 78.0\% \\
-sensor\_f3r3\_normal & 5,967 & 1,301 & 78.2\% \\
+sensor\_f1r1\_normal & 1 & 5,975 & 1,306 & 237,218 ms \\
+sensor\_f2r2\_normal & 2 & 5,971 & 1,315 & 238,677 ms \\
+sensor\_f3r3\_normal & 3 & 5,967 & 1,301 & 240,028 ms \\
 \hline
 \end{tabular}
 \label{tab:persensor}
 \end{center}
 \end{table}
 
-Semua 9 sensor anomaly berhasil mengirim 100\% message, sementara sensor normal konsisten mengalami 78\% packet loss di semua lokasi.
+Dari data per-sensor terlihat bahwa:
+\begin{itemize}
+\item Semua 9 sensor anomaly berhasil mengirim 100\% message tanpa packet loss.
+\item Delay antar sensor anomaly sangat konsisten (206-219 ms), menunjukkan fairness dalam antrian prioritas.
+\item Sensor normal mengalami packet loss konsisten ~78\% di semua floor dan room.
+\item Tidak ada bias terhadap lokasi sensor tertentu dalam topologi.
+\end{itemize}
+
+\subsection{Analisis Per-Floor}
+
+Tabel \ref{tab:perfloor} menyajikan agregasi hasil per-lantai untuk melihat apakah ada perbedaan performa berdasarkan posisi dalam topologi.
+
+\begin{table}[htbp]
+\caption{Perbandingan Per-Floor pada Skenario Baseline}
+\begin{center}
+\begin{tabular}{|c|l|r|r|r|}
+\hline
+\textbf{Floor} & \textbf{Type} & \textbf{Messages} & \textbf{Avg Delay} & \textbf{Loss} \\
+\hline
+1 & Anomaly & 17,901 & 215.14 ms & 0.00\% \\
+1 & Normal & 3,922 & 236,867 ms & 78.10\% \\
+\hline
+2 & Anomaly & 17,892 & 213.42 ms & 0.00\% \\
+2 & Normal & 3,932 & 238,222 ms & 78.07\% \\
+\hline
+3 & Anomaly & 17,883 & 211.56 ms & 0.00\% \\
+3 & Normal & 3,902 & 238,644 ms & 78.17\% \\
+\hline
+\end{tabular}
+\label{tab:perfloor}
+\end{center}
+\end{table}
+
+Hasil menunjukkan tidak ada perbedaan signifikan antar lantai. Floor 3 yang paling jauh dari core switch memiliki delay anomaly sedikit lebih rendah (211.56 ms) dibanding Floor 1 (215.14 ms), menunjukkan bahwa jarak hop tidak mempengaruhi prioritas secara signifikan.
 
 \subsection{QoS Improvement Summary}
 
@@ -299,46 +372,134 @@ Tabel \ref{tab:improvement} merangkum improvement yang dicapai oleh mekanisme DS
 \hline
 \textbf{Metric} & \textbf{Anomaly} & \textbf{Normal} & \textbf{Improvement} \\
 \hline
-Avg Delay & 213.92 ms & 237,612 ms & 1,110x \\
+Avg Delay & 213.92 ms & 237,612 ms & 1,110x faster \\
 \hline
-Packet Loss & 0.00\% & 78.18\% & 100\% \\
+Packet Loss & 0.00\% & 78.18\% & 100\% better \\
 \hline
-Jitter & 60.76 ms & 530.80 ms & 8.7x \\
+Jitter & 60.76 ms & 530.80 ms & 8.7x lower \\
 \hline
-Msg Delivered & 53,673 & 11,726 & 4.6x \\
+Msg Delivered & 53,673 & 11,726 & 4.6x more \\
+\hline
+Std Dev Delay & 43.03 ms & 136,357 ms & 3,169x lower \\
 \hline
 \end{tabular}
 \label{tab:improvement}
 \end{center}
 \end{table}
 
+Hasil menunjukkan improvement yang sangat signifikan. Traffic anomaly mencapai delay 1,110x lebih cepat dengan 100\% message terkirim, dibandingkan traffic normal yang hanya 21.82\% message berhasil diterima.
+
 \section{Discussion}
 
-Hasil eksperimen dari empat skenario menunjukkan keberhasilan kerangka kerja DSCP-based QoS. Beberapa temuan penting:
+Hasil eksperimen dari empat skenario menunjukkan keberhasilan kerangka kerja DSCP-based QoS dalam memprioritaskan traffic MQTT pada kondisi congestion.
 
-\textbf{Efektivitas Prioritas}: Mekanisme HTB queue dengan alokasi bandwidth 60-80\% untuk Queue 1 efektif melindungi traffic prioritas. Pada kondisi congestion 1.8x kapasitas, traffic anomaly mencapai delay 1,110x lebih cepat dan packet loss 0\% dibanding traffic normal.
+\subsection{Efektivitas Mekanisme Prioritas}
 
-\textbf{Konsistensi Per-Sensor}: Semua 9 sensor anomaly di 3 lantai berbeda mendapatkan perlakuan yang sama tanpa bias lokasi. Delay antar sensor sangat konsisten (206-219 ms).
+Mekanisme HTB queue dengan alokasi bandwidth 60-80\% untuk Queue 1 (DSCP 46) terbukti efektif melindungi traffic prioritas tinggi. Pada kondisi congestion 1.8x kapasitas link, traffic anomaly mencapai:
+\begin{itemize}
+\item Delay 1,110x lebih cepat (213.92 ms vs 237,612 ms)
+\item Packet loss 0\% vs 78.18\% untuk traffic normal
+\item Jitter 8.7x lebih rendah (60.76 ms vs 530.80 ms)
+\item Std dev delay 3,169x lebih rendah, menunjukkan konsistensi tinggi
+\end{itemize}
 
-\textbf{Skalabilitas}: Performa pada topologi 17 switches dengan STP hampir identik dengan 13 switches (delay 212.76 ms vs 213.92 ms), menunjukkan skalabilitas yang baik.
+Perbedaan yang sangat signifikan ini membuktikan bahwa DSCP marking di application layer yang dikombinasikan dengan queue management di network layer dapat memberikan diferensiasi QoS yang efektif tanpa memodifikasi protokol MQTT.
 
-\textbf{Ketahanan}: Pada kondisi lossy, delay meningkat 58\% namun reliabilitas tetap terjaga (0.01\% loss). Pada kondisi failure, prioritas tetap dipertahankan meskipun terjadi degradasi.
+\subsection{Konsistensi dan Fairness}
 
-\textbf{Predictability}: Jitter traffic anomaly 8.7x lebih rendah, penting untuk aplikasi yang memerlukan timing yang konsisten.
+Analisis per-sensor menunjukkan bahwa mekanisme prioritas bekerja secara konsisten di semua lokasi:
+\begin{itemize}
+\item Semua 9 sensor anomaly (Floor 1, 2, 3) mendapatkan 0\% packet loss
+\item Delay antar sensor sangat konsisten (206-219 ms, variance $<$6\%)
+\item Tidak ada bias terhadap lokasi sensor dalam topologi hierarchical
+\item Floor 3 yang paling jauh dari core memiliki delay hampir sama dengan Floor 1
+\end{itemize}
 
-Dibandingkan dengan p-MQTT \cite{b3} yang bekerja di broker, pendekatan ini memberikan proteksi di network layer. Dibandingkan dengan RT-MQTT \cite{b2} yang memerlukan middleware, DSCP marking lebih sederhana dan scalable.
+Hal ini menunjukkan bahwa algoritma HTB scheduler memberikan fairness yang baik di antara traffic dengan prioritas yang sama.
+
+\subsection{Skalabilitas pada Topologi Kompleks}
+
+Perbandingan antara topologi 13 switches dan 17 switches menunjukkan skalabilitas yang baik:
+\begin{itemize}
+\item Delay: 213.92 ms (13 sw) vs 212.76 ms (17 sw) - perbedaan $<$1\%
+\item Packet loss: 0\% pada kedua topologi
+\item Throughput: 494.87 msg/s vs 498.20 msg/s
+\end{itemize}
+
+Penambahan 4 switch dan aktivasi STP tidak mempengaruhi performa mekanisme prioritas secara signifikan. Hal ini penting untuk deployment pada jaringan enterprise yang memerlukan redundansi.
+
+\subsection{Ketahanan Terhadap Kondisi Abnormal}
+
+\textbf{Lossy Network:} Pada kondisi lossy, delay meningkat 58\% (dari 213.92 ms menjadi 338.21 ms) karena retransmisi TCP. Namun, reliabilitas tetap terjaga dengan packet loss hanya 0.01\%.
+
+\textbf{Network Failure:} Pada kondisi failure (switch distribusi mati pada menit ke-4), kedua traffic mengalami degradasi. Namun, traffic anomaly tetap mendapatkan perlakuan lebih baik:
+\begin{itemize}
+\item Packet loss anomaly: 41.73\% vs normal: 79.23\%
+\item Delay anomaly: 28.8 detik vs normal: 233.8 detik
+\end{itemize}
+
+Tingginya packet loss anomaly pada skenario failure disebabkan oleh message yang sedang dalam perjalanan saat failure terjadi dan waktu STP reconvergence (30-45 detik).
+
+\subsection{Perbandingan dengan Pendekatan Lain}
+
+Tabel \ref{tab:approachcomp} membandingkan hasil penelitian ini dengan pendekatan sebelumnya.
+
+\begin{table}[htbp]
+\caption{Perbandingan dengan Pendekatan Lain}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Approach} & \textbf{Delay Improv.} & \textbf{Network QoS} & \textbf{Complexity} \\
+\hline
+p-MQTT \cite{b3} & Moderate & No & Low \\
+\hline
+PrioMQTT \cite{b1} & 51-79\% RTT & No & Medium \\
+\hline
+RT-MQTT \cite{b2} & High & Yes & High \\
+\hline
+\textbf{Proposed} & \textbf{1,110x} & \textbf{Yes} & \textbf{Low} \\
+\hline
+\end{tabular}
+\label{tab:approachcomp}
+\end{center}
+\end{table}
+
+Dibandingkan dengan p-MQTT \cite{b3} yang hanya bekerja di broker, pendekatan ini memberikan proteksi QoS di network layer. Dibandingkan dengan RT-MQTT \cite{b2} yang memerlukan middleware dan deep packet inspection, DSCP marking lebih sederhana karena hanya memerlukan socket option di publisher dan flow rules per-DSCP (bukan per-topik) yang lebih scalable.
+
+\subsection{Limitasi dan Future Work}
+
+Beberapa limitasi penelitian ini:
+\begin{itemize}
+\item Pengujian dilakukan pada lingkungan emulasi (Mininet), bukan jaringan fisik
+\item Hanya menguji 2 level prioritas (DSCP 46 dan DSCP 0)
+\item Belum menguji dengan jumlah publisher yang sangat besar ($>$100)
+\end{itemize}
+
+Future work dapat mencakup: evaluasi pada hardware switch fisik, implementasi dynamic priority adjustment, dan integrasi dengan TSN untuk deterministic latency.
 
 \section{Conclusion}
 
-Penelitian ini memvalidasi kerangka kerja QoS berbasis DSCP untuk prioritas traffic MQTT pada SDN. Hasil eksperimen pada empat skenario menunjukkan:
+Penelitian ini mengusulkan dan memvalidasi kerangka kerja QoS berbasis DSCP untuk prioritas traffic MQTT pada jaringan Software-Defined Networking. Kerangka kerja ini mengkombinasikan DSCP marking di application layer dengan queue management di network layer tanpa memerlukan modifikasi pada protokol MQTT standar.
+
+Hasil eksperimen komprehensif pada empat skenario dengan total 12 run menunjukkan efektivitas pendekatan ini:
+
 \begin{itemize}
-\item Traffic anomaly mendapatkan delay 1,110x lebih cepat dan packet loss 0\% pada kondisi normal.
-\item Mekanisme efektif pada topologi kompleks dengan 17 switches dan STP.
-\item Jitter 8.7x lebih rendah untuk traffic prioritas.
-\item Prioritas tetap dipertahankan pada kondisi failure (41.73\% vs 79.23\% loss).
+\item \textbf{Efektivitas}: Traffic anomaly (DSCP 46) mencapai delay 1,110x lebih cepat (213.92 ms vs 237,612 ms) dan packet loss 0\% dibanding traffic normal pada kondisi congestion 1.8x.
+
+\item \textbf{Konsistensi}: Semua 9 sensor anomaly di 3 lantai berbeda mendapatkan perlakuan yang sama dengan delay variance $<$6\%, menunjukkan fairness yang baik.
+
+\item \textbf{Skalabilitas}: Performa hampir identik pada topologi 13 dan 17 switches (perbedaan $<$1\%), menunjukkan skalabilitas untuk deployment enterprise.
+
+\item \textbf{Predictability}: Jitter 8.7x lebih rendah (60.76 ms vs 530.80 ms), penting untuk aplikasi yang memerlukan timing konsisten.
+
+\item \textbf{Ketahanan}: Pada kondisi failure, prioritas tetap dipertahankan dengan traffic anomaly mendapatkan packet loss lebih rendah (41.73\% vs 79.23\%).
 \end{itemize}
 
-Kontribusi meliputi implementasi DSCP marking transparan, integrasi SDN controller, dan validasi komprehensif pada empat skenario berbeda dengan total 12 eksperimen.
+Kontribusi utama penelitian ini meliputi: (1) kerangka kerja QoS berbasis DSCP pertama untuk MQTT yang terintegrasi dengan SDN, (2) arsitektur hybrid sederhana dengan DSCP marking di publisher dan flow rules per-DSCP yang scalable, (3) validasi eksperimental komprehensif pada empat skenario dengan dua topologi berbeda.
+
+Dibandingkan dengan pendekatan sebelumnya, kerangka kerja ini memiliki keunggulan: kompatibel dengan MQTT standar (tidak seperti PrioMQTT), memberikan proteksi QoS di network layer (tidak seperti p-MQTT), dan tidak memerlukan deep packet inspection (tidak seperti RT-MQTT).
+
+Future work dapat mencakup: (a) evaluasi pada hardware switch fisik untuk validasi pada kondisi produksi, (b) implementasi dynamic priority adjustment berdasarkan kondisi jaringan real-time, (c) integrasi dengan Time-Sensitive Networking (TSN) untuk aplikasi industrial yang memerlukan deterministic latency, dan (d) pengujian dengan jumlah publisher yang lebih besar ($>$100) untuk validasi skalabilitas ekstrem.
 
 \begin{thebibliography}{00}
 \bibitem{b1} G. Patti, L. L. Bello, and L. Leonardi, ``PrioMQTT: An MQTT Extension Supporting Prioritized Communications,'' IEEE Trans. Ind. Informat., 2024.
