@@ -11,6 +11,9 @@ docs/related-paper/
 docs/related-papers/
 docs/basic-knowledge/
 
+# LaTeX files (keep local only)
+docs/latex/
+
 # Python
 __pycache__/
 *.py[cod]
