@@ -188,6 +188,25 @@ Tabel perbandingan 9 pendekatan (termasuk Proposed) dengan 8 kriteria:
 - Packet loss dihitung dari `max(publisher_log_count, seq_range)` untuk handle truncated logs
 - Jitter dihitung per-device lalu di-aggregate (bukan across devices)
 
+### CRITICAL: File Sumber Data
+
+| File | Sumber | Gunakan? |
+|------|--------|----------|
+| `metrics_summary.txt` | `generate_summary.py` | **YA - AUTHORITATIVE** |
+| `subscriber_summary.txt` | `subscriber_enhanced.py` | TIDAK - hanya internal |
+| `subscriber.log` | subscriber console output | TIDAK - kalkulasi salah |
+| `mqtt_metrics_log.csv` | subscriber | YA - raw data |
+| `logs/*.log` | publisher logs | YA - sent count |
+
+**JANGAN gunakan data packet loss dari subscriber.log atau subscriber_summary.txt!**
+Subscriber menghitung "Expected" dari range sequence yang diterima, BUKAN dari jumlah yang dikirim.
+
+### Verifikasi Hasil
+```bash
+python3 /home/mqtt-sdn/verify_results.py        # Check all results
+python3 /home/mqtt-sdn/verify_results.py --fix  # Fix incorrect summaries
+```
+
 ---
 
 ## 5. REFERENSI YANG DIGUNAKAN

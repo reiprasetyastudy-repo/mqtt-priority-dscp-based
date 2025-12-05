@@ -8,7 +8,8 @@ import os
 from collections import defaultdict
 
 LOG_FILE = "mqtt_metrics_log.csv"
-SUMMARY_FILE = "metrics_summary.txt"
+# Note: This is subscriber's own summary - generate_summary.py writes the authoritative metrics_summary.txt
+SUMMARY_FILE = "subscriber_summary.txt"
 
 # Read configuration from environment variables
 CONFIG = {
