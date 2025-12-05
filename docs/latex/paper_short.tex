@@ -171,10 +171,88 @@ Proses prioritisasi dilakukan melalui dua tahap: DSCP tagging di publisher dan t
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Implementasi Sistem}
-SDN controller diimplementasikan menggunakan Ryu framework 4.34 dengan OpenFlow 1.3. Controller menginstall flow rules ke semua switch berdasarkan nilai DSCP dengan priority value berbeda.
+\subsection{Implementasi SDN Controller}
+SDN controller diimplementasikan menggunakan Ryu framework 4.34 dengan protokol OpenFlow 1.3. Controller bertanggung jawab untuk:
+\begin{itemize}
+\item Menginstall flow rules ke semua switch berdasarkan nilai DSCP
+\item Mengatur priority value untuk setiap flow rule
+\item Mengarahkan traffic ke queue yang sesuai menggunakan action SetQueue
+\end{itemize}
 
-Sistem MQTT menggunakan Mosquitto broker 2.0 pada port 1883. Publisher diimplementasikan dengan Python menggunakan paho-mqtt 1.6. Publisher anomaly menghasilkan nilai sensor dalam range 50-100, sedangkan publisher normal dalam range 20-30. Rate pengiriman 10 msg/s per publisher dengan payload 150 bytes, sehingga 18 publisher dengan overhead protokol menghasilkan total beban sekitar 360 Kbps yang melebihi kapasitas link 200 Kbps (congestion 1.8x).
+Flow rules diinstall dengan struktur match-action sebagai berikut:
+\begin{itemize}
+\item Match: \texttt{eth\_type=0x0800, ip\_dscp=46}
+\item Action: \texttt{SetQueue(1), Output(port)}
+\item Priority: 100 (lebih tinggi dari default)
+\end{itemize}
+
+Untuk traffic dengan DSCP 0 (Best Effort), flow rule menggunakan priority lebih rendah (50) dan mengarahkan ke Queue 5 dengan bandwidth terbatas.
+
+\subsection{Konfigurasi Queue HTB}
+Queue management menggunakan Hierarchical Token Bucket (HTB) scheduler yang dikonfigurasi pada setiap port switch menggunakan Open vSwitch. Tabel \ref{tab:queue} menunjukkan konfigurasi alokasi bandwidth untuk setiap queue.
+
+\begin{table}[htbp]
+\caption{Konfigurasi Queue HTB}
+\begin{center}
+\begin{tabular}{|c|l|c|c|}
+\hline
+\textbf{Queue} & \textbf{DSCP} & \textbf{Min BW} & \textbf{Max BW} \\
+\hline
+1 & 46 (EF) & 60\% & 80\% \\
+\hline
+2 & 34 (AF41) & 30\% & 50\% \\
+\hline
+3 & 26 (AF31) & 20\% & 40\% \\
+\hline
+4 & 10 (AF11) & 10\% & 25\% \\
+\hline
+5 & 0 (BE) & 5\% & 15\% \\
+\hline
+\end{tabular}
+\label{tab:queue}
+\end{center}
+\end{table}
+
+Queue 1 mendapat alokasi bandwidth tertinggi (60-80\%) untuk memastikan traffic anomaly dengan DSCP 46 mendapat prioritas pengiriman. Queue 5 untuk traffic normal hanya mendapat 5-15\% bandwidth, sehingga pada kondisi congestion traffic ini akan mengalami delay signifikan dan packet loss.
+
+\subsection{Implementasi MQTT}
+Sistem MQTT terdiri dari tiga komponen utama:
+
+\textbf{Broker}: Mosquitto versi 2.0 dikonfigurasi pada port 1883 tanpa autentikasi untuk menyederhanakan eksperimen. Broker berjalan pada host terpisah yang terhubung langsung ke core switch.
+
+\textbf{Publisher}: Diimplementasikan dengan Python 3.8 menggunakan library paho-mqtt 1.6. Setiap publisher:
+\begin{itemize}
+\item Mengirim message dengan rate 10 msg/s
+\item Payload berupa JSON dengan format: \texttt{\{device, value, timestamp, seq\}}
+\item Ukuran payload sekitar 150 bytes
+\item Menggunakan MQTT QoS level 1 untuk guaranteed delivery
+\end{itemize}
+
+Publisher anomaly menghasilkan nilai sensor dalam range 50-100 dan men-set DSCP 46, sedangkan publisher normal menghasilkan nilai 20-30 dengan DSCP 0.
+
+\textbf{Subscriber}: Single subscriber terhubung ke broker dan mencatat semua message yang diterima ke file CSV dengan kolom: timestamp\_sent, timestamp\_received, device, type, value, seq, delay\_ms.
+
+\subsection{Prosedur Eksperimen}
+Setiap eksperimen dijalankan dengan prosedur standar berikut:
+
+\begin{enumerate}
+\item \textbf{Inisialisasi} (2 menit): Start network, controller, broker, dan subscriber
+\item \textbf{Fase Kirim} (10 menit): Start semua 18 publisher secara bersamaan
+\item \textbf{Fase Drain} (10 menit): Stop publisher, subscriber tetap menerima message dari queue
+\item \textbf{Finalisasi} (1 menit): Stop subscriber, generate summary dari CSV
+\end{enumerate}
+
+Total waktu per run adalah sekitar 23 menit. Setiap skenario dijalankan 3 kali dengan jeda 3 menit antar run untuk cleanup. Total waktu eksperimen untuk semua 4 skenario adalah sekitar 4.5 jam.
+
+\subsection{Pengumpulan dan Analisis Data}
+Data dikumpulkan dari beberapa sumber:
+\begin{itemize}
+\item \textbf{Publisher logs}: Mencatat setiap message yang dikirim dengan sequence number
+\item \textbf{Subscriber CSV}: Mencatat setiap message yang diterima dengan delay
+\item \textbf{Summary generator}: Script Python yang menghitung metrics dari data mentah
+\end{itemize}
+
+Packet loss dihitung dengan membandingkan jumlah message yang dikirim (dari publisher logs) dengan yang diterima (dari subscriber CSV). Delay dihitung dari selisih timestamp\_received dan timestamp\_sent yang embedded dalam payload JSON.
 
 \subsection{Skenario Pengujian}
 
