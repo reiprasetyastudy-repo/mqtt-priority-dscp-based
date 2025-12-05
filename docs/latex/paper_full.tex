@@ -451,6 +451,165 @@ Dari tabel perbandingan terlihat bahwa:
 \item Skenario failure menunjukkan degradasi pada kedua traffic, namun mekanisme prioritas tetap memberikan perlakuan lebih baik untuk anomaly.
 \end{itemize}
 
+\subsection{Analisis Per-Sensor}
+
+Untuk memahami distribusi performa secara lebih detail, Tabel \ref{tab:persensor} menyajikan hasil per-sensor pada skenario baseline. Data menunjukkan konsistensi mekanisme prioritas pada setiap sensor individual.
+
+\begin{table}[htbp]
+\caption{Hasil Per-Sensor Skenario Baseline}
+\begin{center}
+\begin{tabular}{|l|c|r|r|r|}
+\hline
+\textbf{Sensor} & \textbf{Floor} & \textbf{Sent} & \textbf{Recv} & \textbf{Avg Delay} \\
+\hline
+\multicolumn{5}{|c|}{\textbf{Anomaly Traffic (DSCP 46)}} \\
+\hline
+sensor\_f1r1\_anomaly & 1 & 5,968 & 5,968 & 212.96 ms \\
+sensor\_f1r2\_anomaly & 1 & 5,967 & 5,967 & 218.38 ms \\
+sensor\_f1r3\_anomaly & 1 & 5,966 & 5,966 & 214.08 ms \\
+sensor\_f2r1\_anomaly & 2 & 5,965 & 5,965 & 219.73 ms \\
+sensor\_f2r2\_anomaly & 2 & 5,964 & 5,964 & 209.80 ms \\
+sensor\_f2r3\_anomaly & 2 & 5,963 & 5,963 & 210.74 ms \\
+sensor\_f3r1\_anomaly & 3 & 5,962 & 5,962 & 213.47 ms \\
+sensor\_f3r2\_anomaly & 3 & 5,961 & 5,961 & 214.45 ms \\
+sensor\_f3r3\_anomaly & 3 & 5,960 & 5,960 & 206.75 ms \\
+\hline
+\multicolumn{5}{|c|}{\textbf{Normal Traffic (DSCP 0)}} \\
+\hline
+sensor\_f1r1\_normal & 1 & 5,975 & 1,306 & 237,218 ms \\
+sensor\_f1r2\_normal & 1 & 5,973 & 1,315 & 236,020 ms \\
+sensor\_f1r3\_normal & 1 & 5,973 & 1,301 & 237,364 ms \\
+sensor\_f2r1\_normal & 2 & 5,972 & 1,304 & 237,714 ms \\
+sensor\_f2r2\_normal & 2 & 5,971 & 1,315 & 238,677 ms \\
+sensor\_f2r3\_normal & 2 & 5,970 & 1,313 & 238,274 ms \\
+sensor\_f3r1\_normal & 3 & 5,968 & 1,305 & 237,470 ms \\
+sensor\_f3r2\_normal & 3 & 5,967 & 1,296 & 238,434 ms \\
+sensor\_f3r3\_normal & 3 & 5,967 & 1,301 & 240,028 ms \\
+\hline
+\end{tabular}
+\label{tab:persensor}
+\end{center}
+\end{table}
+
+Dari data per-sensor dapat dilihat bahwa:
+\begin{itemize}
+\item Semua 9 sensor anomaly berhasil mengirim 100\% message tanpa packet loss.
+\item Delay antar sensor anomaly sangat konsisten (206-219 ms), menunjukkan fairness dalam antrian prioritas.
+\item Sensor normal mengalami packet loss konsisten sekitar 78\% di semua floor dan room.
+\item Tidak ada bias terhadap lokasi sensor tertentu dalam topologi.
+\end{itemize}
+
+\subsection{Analisis Per-Floor}
+
+Tabel \ref{tab:perfloor} menyajikan agregasi hasil per-lantai untuk melihat apakah ada perbedaan performa berdasarkan posisi dalam topologi hierarchical.
+
+\begin{table}[htbp]
+\caption{Perbandingan Per-Floor pada Skenario Baseline}
+\begin{center}
+\begin{tabular}{|c|l|r|r|r|}
+\hline
+\textbf{Floor} & \textbf{Type} & \textbf{Messages} & \textbf{Avg Delay} & \textbf{Loss \%} \\
+\hline
+1 & Anomaly & 17,901 & 215.14 ms & 0.00\% \\
+1 & Normal & 3,922 & 236,867 ms & 78.10\% \\
+\hline
+2 & Anomaly & 17,892 & 213.42 ms & 0.00\% \\
+2 & Normal & 3,932 & 238,222 ms & 78.07\% \\
+\hline
+3 & Anomaly & 17,883 & 211.56 ms & 0.00\% \\
+3 & Normal & 3,902 & 238,644 ms & 78.17\% \\
+\hline
+\end{tabular}
+\label{tab:perfloor}
+\end{center}
+\end{table}
+
+Hasil menunjukkan bahwa tidak ada perbedaan signifikan antar lantai. Floor 3 yang paling jauh dari core switch memiliki delay anomaly sedikit lebih rendah (211.56 ms) dibanding Floor 1 (215.14 ms), yang menunjukkan bahwa jarak hop tidak mempengaruhi prioritas secara signifikan.
+
+\subsection{Analisis Throughput}
+
+Tabel \ref{tab:throughput} menyajikan perbandingan throughput keseluruhan pada setiap skenario.
+
+\begin{table}[htbp]
+\caption{Perbandingan Throughput Antar Skenario}
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline
+\textbf{Skenario} & \textbf{Total Msg} & \textbf{Duration (s)} & \textbf{Throughput} \\
+\hline
+01-Baseline & 65,398 & 132.15 & 494.87 msg/s \\
+\hline
+02-Lossy & 65,246 & 128.00 & 509.97 msg/s \\
+\hline
+05-Redundant & 65,362 & 131.20 & 498.20 msg/s \\
+\hline
+06-Failure & 42,452 & 108.51 & 391.21 msg/s \\
+\hline
+\end{tabular}
+\label{tab:throughput}
+\end{center}
+\end{table}
+
+Throughput pada skenario normal (01, 02, 05) konsisten sekitar 495-510 msg/s, mendekati kapasitas teoritis sistem (18 publisher × 10 msg/s = 180 msg/s input, dengan faktor queue dan processing). Pada skenario failure, throughput turun menjadi 391.21 msg/s karena message yang hilang selama periode failure dan reconvergence.
+
+\subsection{Analisis Jitter}
+
+Tabel \ref{tab:jitter} menyajikan perbandingan jitter antar skenario. Jitter merepresentasikan variasi delay yang penting untuk aplikasi real-time.
+
+\begin{table}[htbp]
+\caption{Perbandingan Jitter Antar Skenario}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Skenario} & \textbf{Anomaly Jitter} & \textbf{Normal Jitter} & \textbf{Ratio} \\
+\hline
+01-Baseline & 60.76 ms & 530.80 ms & 8.7x \\
+\hline
+02-Lossy & 103.67 ms & 534.66 ms & 5.2x \\
+\hline
+05-Redundant & 60.85 ms & 532.68 ms & 8.8x \\
+\hline
+06-Failure & 169.99 ms & 569.65 ms & 3.4x \\
+\hline
+\end{tabular}
+\label{tab:jitter}
+\end{center}
+\end{table}
+
+Traffic anomaly memiliki jitter yang jauh lebih rendah dan stabil (60-170 ms) dibandingkan traffic normal (530-570 ms). Pada kondisi normal, rasio jitter mencapai 8.7-8.8x, menunjukkan bahwa traffic prioritas tidak hanya mendapatkan delay lebih rendah tetapi juga lebih predictable.
+
+\subsection{QoS Improvement Metrics}
+
+Tabel \ref{tab:qosimprovement} merangkum improvement yang dicapai oleh mekanisme DSCP-based QoS.
+
+\begin{table}[htbp]
+\caption{Ringkasan QoS Improvement}
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline
+\textbf{Metric} & \textbf{Anomaly} & \textbf{Normal} & \textbf{Improvement} \\
+\hline
+Avg Delay & 213.92 ms & 237,612 ms & 1,110x faster \\
+\hline
+Packet Loss & 0.00\% & 78.18\% & 100\% better \\
+\hline
+Jitter & 60.76 ms & 530.80 ms & 8.7x lower \\
+\hline
+Message Delivered & 53,673 & 11,726 & 4.6x more \\
+\hline
+\end{tabular}
+\label{tab:qosimprovement}
+\end{center}
+\end{table}
+
+Hasil menunjukkan improvement yang sangat signifikan:
+\begin{itemize}
+\item \textbf{Delay}: Traffic anomaly 1,110x lebih cepat dari normal.
+\item \textbf{Packet Loss}: 100\% message anomaly terkirim vs hanya 21.82\% message normal.
+\item \textbf{Jitter}: Variasi delay 8.7x lebih rendah untuk traffic prioritas.
+\item \textbf{Reliability}: 4.6x lebih banyak message anomaly yang berhasil diterima.
+\end{itemize}
+
 \section{Discussion}
 
 Hasil eksperimen dari empat skenario menunjukkan bahwa kerangka kerja DSCP-based QoS berhasil mencapai tujuan utama penelitian. Berikut analisis mendalam dari setiap aspek:
