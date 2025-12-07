@@ -183,3 +183,75 @@ sudo ./run_3x_experiments.sh 60
 ```
 
 Good luck! 🚀
+
+---
+
+## 🔄 Running in Background (Safe for Disconnection)
+
+If you want to disconnect from terminal while experiment runs:
+
+### Run 3x in Background (10 minutes each)
+```bash
+cd /home/mqtt-sdn/scenarios/07-5level-dscp-13switches
+sudo ./run_3x_background.sh 600
+```
+
+This will:
+- Start experiment in background using `nohup`
+- Save all output to log file
+- Allow you to disconnect safely
+- Continue running even if terminal closes
+
+### Monitor Progress
+```bash
+# Follow the log in real-time
+tail -f results/07-5level-dscp-13switches/background_*/nohup_output.log
+
+# Check if still running
+ps aux | grep run_3x_experiments
+
+# View current status
+cat results/07-5level-dscp-13switches/background_*/nohup_output.log | tail -50
+```
+
+### Stop Background Experiment
+```bash
+# Find the process
+ps aux | grep run_3x_experiments
+
+# Kill it (use PID from above)
+sudo kill <PID>
+
+# Force kill if needed
+sudo kill -9 <PID>
+
+# Cleanup
+sudo mn -c
+sudo pkill -f ryu-manager
+sudo pkill -f mosquitto
+```
+
+### Quick Test in Background (1 minute, 3x)
+```bash
+sudo ./run_3x_background.sh 60
+# You can disconnect immediately after this command
+# Total time: ~10 minutes
+```
+
+---
+
+## 📊 Background Logs Structure
+
+```
+results/07-5level-dscp-13switches/
+└── background_2025-12-07_21-45-00/
+    ├── nohup_output.log              # All experiment output
+    ├── process.pid                   # PID (deleted when done)
+    └── batch_3x_*/                   # Results directory
+        ├── batch_experiment.log
+        ├── run_1/
+        ├── run_2/
+        └── run_3/
+```
+
+---
