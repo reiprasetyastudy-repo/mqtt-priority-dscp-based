@@ -1,0 +1,59 @@
+SIMULATION SUMMARY
+
+ANOMALY TRAFFIC
+Metric,Value,Unit
+Devices,9,
+Messages Received,53634,
+Avg Delay,338.18,ms
+Min Delay,0.74,ms
+Max Delay,3989.06,ms
+Std Dev Delay,272.83,ms
+Avg Jitter,104.35,ms
+
+PACKET LOSS
+Sent,53637,messages
+Received,53634,messages
+Lost,3,messages
+Loss Rate,0.01,%
+
+NORMAL TRAFFIC
+Metric,Value,Unit
+Devices,9,
+Messages Received,11660,
+Avg Delay,237143.99,ms
+Min Delay,0.62,ms
+Max Delay,487185.91,ms
+Std Dev Delay,136213.16,ms
+Avg Jitter,533.83,ms
+
+PACKET LOSS
+Sent,53648,messages
+Received,11660,messages
+Lost,41988,messages
+Loss Rate,78.27,%
+
+TOTAL
+Duration,128.71,s
+Total Messages,65294,
+Throughput,507.31,msg/s
+
+PER-SENSOR METRICS
+Sensor,Floor,Type,Received,Sent,Loss%,Avg Delay (ms)
+sensor_f2r3_normal,2,normal,1393,5967,76.7,246951.60
+sensor_f2r1_normal,2,normal,1231,5959,79.3,244094.08
+sensor_f3r3_normal,3,normal,1314,5954,77.9,240552.17
+sensor_f1r1_normal,1,normal,1272,5962,78.7,239485.01
+sensor_f2r2_normal,2,normal,1376,5968,76.9,236672.24
+sensor_f3r2_normal,3,normal,1436,5951,75.9,233751.80
+sensor_f3r1_normal,3,normal,1302,5966,78.2,232527.87
+sensor_f1r2_normal,1,normal,1175,5971,80.3,230177.27
+sensor_f1r3_normal,1,normal,1161,5950,80.5,228567.50
+sensor_f2r3_anomaly,2,anomaly,5962,5962,0.0,365.77
+sensor_f3r3_anomaly,3,anomaly,5956,5959,0.1,353.37
+sensor_f2r2_anomaly,2,anomaly,5953,5953,0.0,347.44
+sensor_f3r2_anomaly,3,anomaly,5950,5950,0.0,345.37
+sensor_f3r1_anomaly,3,anomaly,5961,5961,0.0,329.38
+sensor_f1r3_anomaly,1,anomaly,5966,5966,0.0,328.42
+sensor_f2r1_anomaly,2,anomaly,5953,5953,0.0,326.69
+sensor_f1r2_anomaly,1,anomaly,5966,5966,0.0,326.23
+sensor_f1r1_anomaly,1,anomaly,5967,5967,0.0,321.01

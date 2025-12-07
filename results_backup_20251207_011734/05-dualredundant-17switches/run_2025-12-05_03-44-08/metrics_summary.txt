@@ -1,0 +1,63 @@
+======================================================================
+                    SIMULATION SUMMARY
+======================================================================
+
+ANOMALY:
+  Devices           : 9
+  Messages Received : 53676
+  Avg Delay         : 214.95 ms
+  Min Delay         : 0.90 ms
+  Max Delay         : 309.26 ms
+  Std Dev Delay     : 43.16 ms
+  Avg Jitter        : 60.83 ms
+
+  PACKET LOSS:
+    Sent            : 53676 messages
+    Received        : 53676 messages
+    Lost            : 0 messages
+    Loss Rate       : 0.00%
+
+NORMAL:
+  Devices           : 9
+  Messages Received : 11689
+  Avg Delay         : 237776.41 ms
+  Min Delay         : 0.69 ms
+  Max Delay         : 475266.54 ms
+  Std Dev Delay     : 136687.17 ms
+  Avg Jitter        : 532.21 ms
+
+  PACKET LOSS:
+    Sent            : 53730 messages
+    Received        : 11689 messages
+    Lost            : 42041 messages
+    Loss Rate       : 78.24%
+
+TOTAL:
+  Duration          : 131.22 s
+  Total Messages    : 65365
+  Throughput        : 498.14 msg/s
+
+==========================================================================================
+PER-SENSOR METRICS
+==========================================================================================
+
+Sensor                     Floor Type       Recv   Sent    Loss    Avg Delay
+-------------------------- ----- -------- ------ ------ ------- ------------
+sensor_f1r2_normal             1 normal     1305   5973   78.2%  239326.43ms
+sensor_f2r1_normal             2 normal     1297   5971   78.3%  238871.96ms
+sensor_f3r2_normal             3 normal     1297   5967   78.3%  238543.87ms
+sensor_f3r1_normal             3 normal     1296   5968   78.3%  238228.76ms
+sensor_f1r3_normal             1 normal     1294   5972   78.3%  238023.94ms
+sensor_f2r2_normal             2 normal     1303   5970   78.2%  237273.08ms
+sensor_f3r3_normal             3 normal     1299   5966   78.2%  236975.39ms
+sensor_f2r3_normal             2 normal     1301   5969   78.2%  236397.19ms
+sensor_f1r1_normal             1 normal     1297   5974   78.3%  236346.23ms
+sensor_f2r3_anomaly            2 anomaly    5963   5963    0.0%     224.08ms
+sensor_f1r3_anomaly            1 anomaly    5966   5966    0.0%     221.16ms
+sensor_f1r2_anomaly            1 anomaly    5967   5967    0.0%     219.39ms
+sensor_f3r3_anomaly            3 anomaly    5960   5960    0.0%     215.97ms
+sensor_f3r2_anomaly            3 anomaly    5961   5961    0.0%     214.71ms
+sensor_f1r1_anomaly            1 anomaly    5968   5968    0.0%     213.10ms
+sensor_f3r1_anomaly            3 anomaly    5962   5962    0.0%     211.49ms
+sensor_f2r1_anomaly            2 anomaly    5965   5965    0.0%     209.20ms
+sensor_f2r2_anomaly            2 anomaly    5964   5964    0.0%     205.45ms

@@ -2,7 +2,7 @@
 # =============================================================================
 # AUTOMATED EXPERIMENT RUNNER
 # =============================================================================
-# Runs all scenarios (01, 02, 05, 06) with 3 repetitions each.
+# Runs all 6 scenarios (01-06) with 3 repetitions each.
 # Designed to run in background with nohup.
 #
 # Usage:
@@ -14,7 +14,14 @@
 set -e
 
 # Configuration
-SCENARIOS=("01-baseline-13switches" "02-lossy-13switches" "05-dualredundant-17switches" "06-distfailure-17switches")
+SCENARIOS=(
+    "01-baseline-13switches"
+    "02-lossy-13switches"
+    "03-dualcore-14switches"
+    "04-corefailure-14switches"
+    "05-dualredundant-17switches"
+    "06-distfailure-17switches"
+)
 RUNS_PER_SCENARIO=3
 DURATION=600          # 10 minutes send phase
 DELAY_BETWEEN_RUNS=180  # 3 minutes between runs

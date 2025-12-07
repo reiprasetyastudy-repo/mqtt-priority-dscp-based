@@ -35,6 +35,8 @@ Publisher                    SDN Switch                     Broker
 |---|----------|----------|-------------|
 | 01 | Baseline | 13 | Normal hierarchical topology |
 | 02 | Lossy | 13 | Added packet loss (10% core, 5% edge) |
+| 03 | Dual-Core | 14 | 2 core switches for redundancy |
+| 04 | Core-Failure | 14 | Core 1 fails at 150s (2.5 min) |
 | 05 | Dual-Redundant | 17 | Full redundancy at all layers |
 | 06 | Dist-Failure | 17 | Distribution layer failure at 4 min |
 
@@ -47,6 +49,7 @@ Publisher                    SDN Switch                     Broker
 | Send Phase | 10 min | Publishers sending data |
 | Drain Phase | 10 min | Waiting for queued messages |
 | Repetitions | 3x | Per scenario |
+| Shutdown | Graceful | Publishers stop via internal timer (not pkill) |
 
 ## Evaluation Metrics
 
@@ -102,11 +105,13 @@ mqtt-sdn/
 ├── scenarios/           # Experiment scenarios
 │   ├── 01-baseline-13switches/
 │   ├── 02-lossy-13switches/
+│   ├── 03-dualcore-14switches/
+│   ├── 04-corefailure-14switches/
 │   ├── 05-dualredundant-17switches/
 │   └── 06-distfailure-17switches/
 ├── shared/              # Shared modules
 │   ├── sdn/controller.py
-│   ├── mqtt/publisher_dscp.py
+│   ├── mqtt/publisher_dscp.py   # With graceful shutdown
 │   └── topology/base.py
 ├── results/             # Experiment outputs
 ├── docs/                # Documentation & LaTeX paper
@@ -132,4 +137,4 @@ mqtt-sdn/
 
 ---
 
-**Last Updated**: 2025-12-05
+**Last Updated**: 2025-12-07

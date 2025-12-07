@@ -102,7 +102,8 @@ class DSCPPublisher:
     """Generic DSCP-enabled MQTT Publisher"""
 
     def __init__(self, dscp_value, traffic_type='anomaly', device_name=None,
-                 broker_ip=None, broker_port=1883, msg_rate=None, topic='iot/data'):
+                 broker_ip=None, broker_port=1883, msg_rate=None, topic='iot/data',
+                 duration=0):
         """
         Initialize DSCP Publisher
 
@@ -114,6 +115,7 @@ class DSCPPublisher:
             broker_port (int): MQTT broker port (default: 1883)
             msg_rate (float): Messages per second (default: 50)
             topic (str): MQTT topic (default: 'iot/data')
+            duration (float): Send duration in seconds (0 = unlimited)
         """
         # Configuration
         self.dscp_value = dscp_value
@@ -123,6 +125,7 @@ class DSCPPublisher:
         self.broker_port = broker_port
         self.msg_rate = msg_rate or 50.0
         self.topic = topic
+        self.duration = duration  # 0 = unlimited
 
         # Get traffic type config
         self.traffic_config = TRAFFIC_TYPES.get(self.traffic_type, TRAFFIC_TYPES['normal'])
@@ -130,9 +133,12 @@ class DSCPPublisher:
         # State
         self.sequence_number = 0
         self.client = None
+        self.start_time = None
+        self.stop_time = None
 
     def print_header(self):
         """Print startup header"""
+        from datetime import datetime
         print("=" * 70)
         print(f"  {self.traffic_config['label']} Publisher with DSCP Tagging")
         print("=" * 70)
@@ -140,11 +146,13 @@ class DSCPPublisher:
         print(f"Broker        : {self.broker_ip}:{self.broker_port}")
         print(f"Topic         : {self.topic}")
         print(f"Rate          : {self.msg_rate} msg/s")
+        print(f"Duration      : {self.duration}s" if self.duration > 0 else "Duration      : Unlimited")
         print(f"Traffic Type  : {self.traffic_type}")
         print(f"DSCP Value    : {self.dscp_value} ({get_dscp_name(self.dscp_value)})")
         print(f"Priority      : {get_priority_name(self.dscp_value).upper()}")
         print(f"Description   : {get_description(self.dscp_value)}")
         print(f"Value Range   : {self.traffic_config['value_range']}")
+        print(f"Init Time     : {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}")
         print("=" * 70)
 
     def setup_client(self):
@@ -163,12 +171,23 @@ class DSCPPublisher:
 
     def connect(self):
         """Connect to MQTT broker"""
+        from datetime import datetime
         self.client.connect(self.broker_ip, self.broker_port, keepalive=60)
         self.client.loop_start()
 
         # Wait for connection
         time.sleep(1)
-        print("[MQTT] Connected! Publishing messages...")
+        
+        # Record start time AFTER connection (this is when sending actually begins)
+        self.start_time = time.time()
+        start_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        
+        print(f"[MQTT] Connected! Publishing messages...")
+        print(f"[START] Send phase started at {start_datetime}")
+        if self.duration > 0:
+            from datetime import timedelta
+            end_datetime = (datetime.now() + timedelta(seconds=self.duration)).strftime('%H:%M:%S')
+            print(f"[START] Expected end time: {end_datetime} (duration: {self.duration}s)")
         print()
 
     def generate_payload(self):
@@ -188,16 +207,30 @@ class DSCPPublisher:
         return payload
 
     def publish_loop(self):
-        """Main publishing loop"""
+        """Main publishing loop with duration control"""
+        from datetime import datetime
+        
         try:
             while True:
+                # Check duration limit (timer started after connection)
+                if self.duration > 0:
+                    elapsed = time.time() - self.start_time
+                    if elapsed >= self.duration:
+                        self.stop_time = time.time()
+                        actual_duration = self.stop_time - self.start_time
+                        stop_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                        print(f"\n[TIMER] Duration {self.duration}s reached")
+                        print(f"[STOP] Send phase stopped at {stop_datetime}")
+                        print(f"[STOP] Actual send duration: {actual_duration:.3f}s")
+                        break
+                
                 # Generate payload
                 payload = self.generate_payload()
 
                 # Publish to MQTT
                 result = self.client.publish(self.topic, json.dumps(payload), qos=1)
 
-                # Print status (flush=True to prevent log truncation when killed)
+                # Print status (flush=True to prevent log truncation)
                 label = self.traffic_config['label']
                 if result.rc == mqtt.MQTT_ERR_SUCCESS:
                     print(f"[{label}/DSCP{self.dscp_value}] "
@@ -210,16 +243,42 @@ class DSCPPublisher:
                 time.sleep(1.0 / self.msg_rate)
 
         except KeyboardInterrupt:
-            print("\n[STOP] Stopped by user")
+            self.stop_time = time.time()
+            stop_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+            print(f"\n[STOP] Stopped by user at {stop_datetime}")
+            if self.start_time:
+                print(f"[STOP] Actual send duration: {self.stop_time - self.start_time:.3f}s")
         finally:
             self.cleanup()
 
     def cleanup(self):
-        """Cleanup and disconnect"""
+        """Cleanup and disconnect gracefully"""
+        from datetime import datetime
+        
+        print(f"\n[CLEANUP] Flushing buffers and disconnecting...")
+        
         if self.client:
+            # Wait for pending messages to be sent (TCP buffer flush)
+            # This gives TCP time to complete any retransmissions
+            time.sleep(2)
+            
             self.client.loop_stop()
             self.client.disconnect()
-        print(f"[EXIT] Total sent: {self.sequence_number} messages")
+            
+            # Additional wait for clean disconnect
+            time.sleep(1)
+        
+        disconnect_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        print(f"[EXIT] Disconnected at {disconnect_time}")
+        print(f"[EXIT] Total messages sent: {self.sequence_number}")
+        
+        # Summary
+        if self.start_time and self.stop_time:
+            actual_duration = self.stop_time - self.start_time
+            expected_msgs = int(actual_duration * self.msg_rate)
+            print(f"[EXIT] Actual send duration: {actual_duration:.3f}s")
+            print(f"[EXIT] Expected messages: ~{expected_msgs} (at {self.msg_rate} msg/s)")
+            print(f"[EXIT] Send rate achieved: {self.sequence_number / actual_duration:.2f} msg/s")
 
     def run(self):
         """Run the publisher (main entry point)"""
@@ -234,7 +293,8 @@ class DSCPPublisher:
 # ============================================================================
 
 def run_publisher(dscp_value, traffic_type='anomaly', device_name=None,
-                  broker_ip=None, broker_port=1883, msg_rate=None, topic='iot/data'):
+                  broker_ip=None, broker_port=1883, msg_rate=None, topic='iot/data',
+                  duration=None):
     """
     Convenience function to run publisher with specified configuration
 
@@ -246,10 +306,11 @@ def run_publisher(dscp_value, traffic_type='anomaly', device_name=None,
         broker_port (int): MQTT broker port (default: 1883)
         msg_rate (float): Messages per second (optional, uses env or default)
         topic (str): MQTT topic (default: 'iot/data')
+        duration (float): Send duration in seconds (optional, uses env or 0=unlimited)
 
     Example:
         >>> from shared.mqtt.publisher_dscp import run_publisher
-        >>> run_publisher(dscp_value=46, traffic_type='anomaly')
+        >>> run_publisher(dscp_value=46, traffic_type='anomaly', duration=600)
     """
     # Get configuration from environment if not provided
     if broker_ip is None:
@@ -260,6 +321,9 @@ def run_publisher(dscp_value, traffic_type='anomaly', device_name=None,
 
     if msg_rate is None:
         msg_rate = float(os.getenv("MSG_RATE", "50"))
+    
+    if duration is None:
+        duration = float(os.getenv("DURATION", "0"))  # 0 = unlimited
 
     # Create and run publisher
     publisher = DSCPPublisher(
@@ -269,7 +333,8 @@ def run_publisher(dscp_value, traffic_type='anomaly', device_name=None,
         broker_ip=broker_ip,
         broker_port=broker_port,
         msg_rate=msg_rate,
-        topic=topic
+        topic=topic,
+        duration=duration
     )
 
     publisher.run()
@@ -336,6 +401,10 @@ Traffic Types:
                         default=os.getenv('TOPIC', 'iot/data'),
                         help='MQTT topic. Default: from TOPIC env or iot/data')
 
+    parser.add_argument('--duration', dest='duration', type=float,
+                        default=float(os.getenv('DURATION', '0')),
+                        help='Send duration in seconds (0=unlimited). Default: from DURATION env or 0')
+
     return parser.parse_args()
 
 
@@ -351,7 +420,8 @@ def main():
         broker_ip=args.broker_ip,
         broker_port=args.broker_port,
         msg_rate=args.msg_rate,
-        topic=args.topic
+        topic=args.topic,
+        duration=args.duration
     )
 
 
