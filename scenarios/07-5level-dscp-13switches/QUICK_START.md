@@ -2,12 +2,13 @@
 
 ## 🚀 Running 3x Experiments (Recommended)
 
-For **statistically valid results**, run 3 repetitions:
+For **statistically valid results**, run 3 repetitions in background:
 
-### 10-Minute Experiment (3x)
+### 10-Minute Experiment (3x, Background)
 ```bash
 cd /home/mqtt-sdn/scenarios/07-5level-dscp-13switches
-sudo ./run_3x_experiments.sh 600
+sudo ./run_3x_background.sh 600
+# You can disconnect terminal immediately!
 ```
 
 **Total Time:** ~66 minutes (1 hour 6 min)
@@ -17,9 +18,10 @@ sudo ./run_3x_experiments.sh 600
 - Delay: 3 min
 - Run 3: 20 min
 
-### Quick Test (1 minute, 3x)
+### Quick Test (1 minute, 3x, Background)
 ```bash
-sudo ./run_3x_experiments.sh 60
+sudo ./run_3x_background.sh 60
+# You can disconnect terminal immediately!
 ```
 
 **Total Time:** ~10 minutes
@@ -63,7 +65,10 @@ Each run should show gradual performance degradation:
 ## 🔍 View Results
 
 ```bash
-# View all 3 summaries
+# Monitor progress in real-time
+tail -f results/07-5level-dscp-13switches/batch_3x_*/nohup_output.log
+
+# View all 3 summaries (after completion)
 cat results/07-5level-dscp-13switches/batch_3x_*/run_*/metrics_summary.txt
 
 # View specific run
@@ -99,13 +104,13 @@ sudo ./run_experiment.sh 60
 Before running full experiment, do a quick test:
 
 ```bash
-# 1. Quick test (60 seconds)
-sudo ./run_3x_experiments.sh 60
+# 1. Quick test (60 seconds, background)
+sudo ./run_3x_background.sh 60
 
-# 2. Check results
-ls -la results/07-5level-dscp-13switches/batch_3x_*/run_*/
+# 2. Monitor progress
+tail -f results/07-5level-dscp-13switches/batch_3x_*/nohup_output.log
 
-# 3. Verify all 3 runs completed
+# 3. After ~10 minutes, verify all 3 runs completed
 cat results/07-5level-dscp-13switches/batch_3x_*/batch_experiment.log | grep "completed successfully"
 
 # Expected output:
@@ -122,9 +127,9 @@ If all 3 runs complete successfully, you're ready for the full experiment!
 
 | Use Case | Command | Duration | Repetitions | Total Time |
 |----------|---------|----------|-------------|------------|
-| **Research/Paper** | `./run_3x_experiments.sh 600` | 10 min | 3x | ~66 min |
+| **Research/Paper** | `./run_3x_background.sh 600` | 10 min | 3x | ~66 min |
 | **Demo/Presentation** | `./run_experiment.sh 600` | 10 min | 1x | ~20 min |
-| **Quick Test** | `./run_3x_experiments.sh 60` | 1 min | 3x | ~10 min |
+| **Quick Test** | `./run_3x_background.sh 60` | 1 min | 3x | ~10 min |
 | **Setup Verification** | `./run_experiment.sh 60` | 1 min | 1x | ~2 min |
 
 ---
@@ -179,7 +184,8 @@ sudo python3 topology.py --duration 60
 
 ```bash
 cd /home/mqtt-sdn/scenarios/07-5level-dscp-13switches
-sudo ./run_3x_experiments.sh 60
+sudo ./run_3x_background.sh 60
+# You can disconnect immediately after this!
 ```
 
 Good luck! 🚀
